@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>parse Package &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="index.html" />
+    <link rel="up" title="mbmp Package" href="mbmp.html" />
+    <link rel="next" title="server Package" href="mbmp.server.html" />
+    <link rel="prev" title="classifiers Package" href="mbmp.classifiers.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.server.html" title="server Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.classifiers.html" title="classifiers Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" accesskey="U">mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="parse-package">
+<h1>parse Package<a class="headerlink" href="#parse-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">parse</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mbmp.parse"></span><dl class="class">
+<dt id="mbmp.parse.MbmaParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.</tt><tt class="descname">MbmaParser</tt><big>(</big><em>**parser_args</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">nltk.parse.chart.ChartParser</span></tt></p>
+<p>A ChartParser using a bottom-up parsing strategy plus the Right Hand Rule.
+See <tt class="xref py py-func docutils literal"><span class="pre">RightHandRule()</span></tt> for more information.</p>
+<dl class="method">
+<dt id="mbmp.parse.MbmaParser.nbest_parse">
+<tt class="descname">nbest_parse</tt><big>(</big><em>word</em>, <em>n=None</em>, <em>post_process=False</em>, <em>filter=None</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaParser.nbest_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nbest parses for the given word.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str or list): a list or string of morphemes</li>
+<li>n (int): how many parses should be returned</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of trees</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.MbmaParser.set_grammar">
+<tt class="descname">set_grammar</tt><big>(</big><em>grammar</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaParser.set_grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asign a new grammar to the parser</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parser_args: needs grammar of type <tt class="xref py py-class docutils literal"><span class="pre">ContextFreeGrammar</span></tt></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.parse.CKYParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.</tt><tt class="descname">CKYParser</tt><big>(</big><em>grammar=None</em>, <em>beam_size=1000</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A CKY Parser for deriving trees that represent possible structures for a
+sequence of morphemes.</p>
+<dl class="method">
+<dt id="mbmp.parse.CKYParser.acceptable">
+<tt class="descname">acceptable</tt><big>(</big><em>lhs</em>, <em>prob</em>, <em>trees</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser.acceptable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if there are no trees yet or when the probability
+of the potentional tree is higher than the trees already found.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>lhs: the top node of the new tree</li>
+<li>prob (float): the probability of the new tree</li>
+<li>trees: a list of trees</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.CKYParser.assign_top_probabilitiy">
+<tt class="descname">assign_top_probabilitiy</tt><big>(</big><em>tree</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser.assign_top_probabilitiy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.CKYParser.find_productions">
+<tt class="descname">find_productions</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser.find_productions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find productions that have left and right as the RHS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>left: the left Nonterminal</li>
+<li>right: the right Nonterminal</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all grammar rules that have left and right as the RHS.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.CKYParser.nbest_parse">
+<tt class="descname">nbest_parse</tt><big>(</big><em>tokens</em>, <em>n=5</em>, <em>post_process=False</em>, <em>filter=None</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser.nbest_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nbest parses for the given word. Parses with the same
+probability will count for one n step.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>tokens (list): the list of morphemes to be parsed.</li>
+<li>n (int): how many parses to be returned.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; the nbest parses</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.CKYParser.parse">
+<tt class="descname">parse</tt><big>(</big><em>tokens</em><big>)</big><a class="headerlink" href="#mbmp.parse.CKYParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive of possible trees from the input.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>tokens: a list of morphemes</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all complete parses that could be derived.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.parse.MbmaCKYParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.</tt><tt class="descname">MbmaCKYParser</tt><big>(</big><em>grammar=None</em>, <em>beam_size=1000</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaCKYParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.parse.pparse.CKYParser" title="mbmp.parse.pparse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.pparse.CKYParser</span></tt></a></p>
+<p>This parser implements a <a class="reference internal" href="#mbmp.parse.CKYParser" title="mbmp.parse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">CKYParser</span></tt></a> that uses the grammar rules from
+<tt class="xref py py-class docutils literal"><span class="pre">mbmp.MBMA</span></tt> and &#8211; if needed &#8211; a Probabilistic Context Free Grammar
+to parse a word.</p>
+<dl class="method">
+<dt id="mbmp.parse.MbmaCKYParser.find_productions">
+<tt class="descname">find_productions</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaCKYParser.find_productions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find productions that have left and right as the RHS. First try to
+find productions in the valency rules returned by MBMA. If that
+fails, try to find the productions in the PCFG.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>left: the left Nonterminal</li>
+<li>right: the right Nonterminal</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all grammar rules that have left and right as the RHS.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.MbmaCKYParser.set_grammar">
+<tt class="descname">set_grammar</tt><big>(</big><em>productions</em><big>)</big><a class="headerlink" href="#mbmp.parse.MbmaCKYParser.set_grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the grammar rules from MBMA to the parser. Transforms all rules
+to Chomsky Normal Form, induces a Weighted Context Free Grammar on
+the basis of these rules and indexes the Right Hand Rules of the
+productions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>productions (list): a list of <tt class="xref py py-class docutils literal"><span class="pre">nltk.Production</span></tt> instances</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.parse.parse">
+<span id="parse-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">parse</span></tt> Module<a class="headerlink" href="#module-mbmp.parse.parse" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.parse.parse.MbmaParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.parse.</tt><tt class="descname">MbmaParser</tt><big>(</big><em>**parser_args</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/parse.html#MbmaParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.MbmaParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">nltk.parse.chart.ChartParser</span></tt></p>
+<p>A ChartParser using a bottom-up parsing strategy plus the Right Hand Rule.
+See <a class="reference internal" href="#mbmp.parse.parse.RightHandRule" title="mbmp.parse.parse.RightHandRule"><tt class="xref py py-func docutils literal"><span class="pre">RightHandRule()</span></tt></a> for more information.</p>
+<dl class="method">
+<dt id="mbmp.parse.parse.MbmaParser.nbest_parse">
+<tt class="descname">nbest_parse</tt><big>(</big><em>word</em>, <em>n=None</em>, <em>post_process=False</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/parse.html#MbmaParser.nbest_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.MbmaParser.nbest_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nbest parses for the given word.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str or list): a list or string of morphemes</li>
+<li>n (int): how many parses should be returned</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of trees</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.parse.MbmaParser.set_grammar">
+<tt class="descname">set_grammar</tt><big>(</big><em>grammar</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/parse.html#MbmaParser.set_grammar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.MbmaParser.set_grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asign a new grammar to the parser</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parser_args: needs grammar of type <tt class="xref py py-class docutils literal"><span class="pre">ContextFreeGrammar</span></tt></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.parse.parse.RightHandRule">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.parse.</tt><tt class="descname">RightHandRule</tt><a class="reference internal" href="_modules/mbmp/parse/parse.html#RightHandRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.RightHandRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">nltk.parse.chart.AbstractChartRule</span></tt></p>
+<p>A rule that joins two adjacent edges together into a single combined edge.
+In particular, this rule states that any pair of edges that are not
+lexical (see <tt class="xref py py-func docutils literal"><span class="pre">is_lexical()</span></tt>) can be joined resulting in a new edge
+in which the left-hand-side is taken from the right edge and the right-
+hand-side is the adjunction of the left-hand-side of the left and right
+edge.</p>
+<dl class="attribute">
+<dt id="mbmp.parse.parse.RightHandRule.NUM_EDGES">
+<tt class="descname">NUM_EDGES</tt><em class="property"> = 1</em><a class="headerlink" href="#mbmp.parse.parse.RightHandRule.NUM_EDGES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.parse.RightHandRule.apply_iter">
+<tt class="descname">apply_iter</tt><big>(</big><em>chart</em>, <em>grammar</em>, <em>right_edge</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/parse.html#RightHandRule.apply_iter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.RightHandRule.apply_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.parse.parse.demo">
+<tt class="descclassname">mbmp.parse.parse.</tt><tt class="descname">demo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/parse/parse.html#demo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.parse.demo" title="Permalink to this definition">¶</a></dt>
+<dd><p>A demo showing some basic functionality.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.parse.pparse">
+<span id="pparse-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">pparse</span></tt> Module<a class="headerlink" href="#module-mbmp.parse.pparse" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.parse.pparse.CKYParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.pparse.</tt><tt class="descname">CKYParser</tt><big>(</big><em>grammar=None</em>, <em>beam_size=1000</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A CKY Parser for deriving trees that represent possible structures for a
+sequence of morphemes.</p>
+<dl class="method">
+<dt id="mbmp.parse.pparse.CKYParser.acceptable">
+<tt class="descname">acceptable</tt><big>(</big><em>lhs</em>, <em>prob</em>, <em>trees</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser.acceptable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser.acceptable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if there are no trees yet or when the probability
+of the potentional tree is higher than the trees already found.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>lhs: the top node of the new tree</li>
+<li>prob (float): the probability of the new tree</li>
+<li>trees: a list of trees</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.pparse.CKYParser.assign_top_probabilitiy">
+<tt class="descname">assign_top_probabilitiy</tt><big>(</big><em>tree</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser.assign_top_probabilitiy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser.assign_top_probabilitiy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.pparse.CKYParser.find_productions">
+<tt class="descname">find_productions</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser.find_productions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser.find_productions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find productions that have left and right as the RHS.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>left: the left Nonterminal</li>
+<li>right: the right Nonterminal</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all grammar rules that have left and right as the RHS.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.pparse.CKYParser.nbest_parse">
+<tt class="descname">nbest_parse</tt><big>(</big><em>tokens</em>, <em>n=5</em>, <em>post_process=False</em>, <em>filter=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser.nbest_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser.nbest_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nbest parses for the given word. Parses with the same
+probability will count for one n step.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>tokens (list): the list of morphemes to be parsed.</li>
+<li>n (int): how many parses to be returned.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; the nbest parses</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.pparse.CKYParser.parse">
+<tt class="descname">parse</tt><big>(</big><em>tokens</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#CKYParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.CKYParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive of possible trees from the input.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>tokens: a list of morphemes</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all complete parses that could be derived.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.parse.pparse.MbmaCKYParser">
+<em class="property">class </em><tt class="descclassname">mbmp.parse.pparse.</tt><tt class="descname">MbmaCKYParser</tt><big>(</big><em>grammar=None</em>, <em>beam_size=1000</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#MbmaCKYParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.MbmaCKYParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.parse.pparse.CKYParser" title="mbmp.parse.pparse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.pparse.CKYParser</span></tt></a></p>
+<p>This parser implements a <a class="reference internal" href="#mbmp.parse.pparse.CKYParser" title="mbmp.parse.pparse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">CKYParser</span></tt></a> that uses the grammar rules from
+<tt class="xref py py-class docutils literal"><span class="pre">mbmp.MBMA</span></tt> and &#8211; if needed &#8211; a Probabilistic Context Free Grammar
+to parse a word.</p>
+<dl class="method">
+<dt id="mbmp.parse.pparse.MbmaCKYParser.find_productions">
+<tt class="descname">find_productions</tt><big>(</big><em>left</em>, <em>right</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#MbmaCKYParser.find_productions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.MbmaCKYParser.find_productions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find productions that have left and right as the RHS. First try to
+find productions in the valency rules returned by MBMA. If that
+fails, try to find the productions in the PCFG.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>left: the left Nonterminal</li>
+<li>right: the right Nonterminal</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; all grammar rules that have left and right as the RHS.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.parse.pparse.MbmaCKYParser.set_grammar">
+<tt class="descname">set_grammar</tt><big>(</big><em>productions</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/pparse.html#MbmaCKYParser.set_grammar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.pparse.MbmaCKYParser.set_grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the grammar rules from MBMA to the parser. Transforms all rules
+to Chomsky Normal Form, induces a Weighted Context Free Grammar on
+the basis of these rules and indexes the Right Hand Rules of the
+productions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>productions (list): a list of <tt class="xref py py-class docutils literal"><span class="pre">nltk.Production</span></tt> instances</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.parse.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mbmp.parse.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.parse.util.make_grammar">
+<tt class="descclassname">mbmp.parse.util.</tt><tt class="descname">make_grammar</tt><big>(</big><em>parse</em>, <em>mrepr='tokens-and-lemmas'</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/util.html#make_grammar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.util.make_grammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of Productions on the basis of an output parse of L{MBMA}.
+MBMA returns parses in the following format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[(</span><span class="s">&#39;V|*V&#39;</span><span class="p">,</span> <span class="s">&#39;ver&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="s">&#39;eis&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;INFLtWB&#39;</span><span class="p">,</span> <span class="s">&#39;t&#39;</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>This is transformed into the following list of productions:</p>
+<div class="highlight-python"><pre>[PRE:ver -&gt; 'ver', V -&gt; PRE:ver V, V -&gt; 'eis', INFL:t -&gt; 't', V -&gt; V INFL:t]</pre>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse (list): a parse return by <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt></li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>list &#8211; a list of Productions.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.parse.util.nonterminals">
+<tt class="descclassname">mbmp.parse.util.</tt><tt class="descname">nonterminals</tt><big>(</big><em>items</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/util.html#nonterminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.util.nonterminals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of Nonterminals from a list of strings.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>items (ist): a list of Nonterminals</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.parse.util.post_process_tree">
+<tt class="descclassname">mbmp.parse.util.</tt><tt class="descname">post_process_tree</tt><big>(</big><em>tree</em>, <em>lexical_tags=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/util.html#post_process_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.util.post_process_tree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.parse.util.remove_lexical_tags">
+<tt class="descclassname">mbmp.parse.util.</tt><tt class="descname">remove_lexical_tags</tt><big>(</big><em>tree</em><big>)</big><a class="reference internal" href="_modules/mbmp/parse/util.html#remove_lexical_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.parse.util.remove_lexical_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the lexical tags from lexical trees in TREE
+(i.e. PRE:ver becomes PRE).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>tree: a hierarchical Tree object</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">parse Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">parse</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-mbmp.parse.parse"><tt class="docutils literal"><span class="pre">parse</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.parse.pparse"><tt class="docutils literal"><span class="pre">pparse</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.parse.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mbmp.classifiers.html"
+                        title="previous chapter">classifiers Package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mbmp.server.html"
+                        title="next chapter">server Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mbmp.parse.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.server.html" title="server Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.classifiers.html" title="classifiers Package"
+             >previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" >mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

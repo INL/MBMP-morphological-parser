@@ -1,0 +1,35 @@
+classifiers Package
+===================
+
+:mod:`classifiers` Package
+--------------------------
+
+.. automodule:: mbmp.classifiers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`api` Module
+-----------------
+
+.. automodule:: mbmp.classifiers.api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`classifier` Module
+------------------------
+
+.. automodule:: mbmp.classifiers.classifier
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. automodule:: mbmp.classifiers.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

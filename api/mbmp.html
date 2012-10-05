@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp Package &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="index.html" />
+    <link rel="next" title="classifiers Package" href="mbmp.classifiers.html" />
+    <link rel="prev" title="Welcome to mbmp’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.classifiers.html" title="classifiers Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mbmp’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mbmp-package">
+<h1>mbmp Package<a class="headerlink" href="#mbmp-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">mbmp</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mbmp.__init__"></span><p>Memory-Based Morphological Parsing</p>
+<p>This package consists of an implementation and extensions of Memory-Based
+Morphological Analysis (MBMA) as described by Van den Bosch &amp; Daelemans
+(1999). MBMA is extended with a specialized CKY Parser that returns all
+possible derivations for a given analysis of MBMA. In addition to an
+implementation of &#8216;standard&#8217; MBMA, this package contains a class to perform
+morphological segmentation (MBMS), i.e. the segmentation of words into
+morphemes. Furthermore, the package provides a Memory-Based Morphological
+Chunker (MBMC), which is used to analyze words into hierarchical
+structures in an alternative way. Lastly, the package can be used to
+lemmatize word forms (MBLEM) and to assign part-of-speech tags to lemmas
+(MBPT).</p>
+<p>All classes (MBMA, MBMS, MBMC, MBLEM, MBPT) extend the
+abstract MBClassifier interface. The Memory-Based Classifier sets up an
+instance of TimblServer and connects to this server via a client (see
+TimblClient).</p>
+</div>
+<div class="section" id="module-mbmp.client">
+<span id="client-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">client</span></tt> Module<a class="headerlink" href="#module-mbmp.client" title="Permalink to this headline">¶</a></h2>
+<p>Module that implements a client for communicating with a timblserver. Note
+that the class TimblClient does not depend on the class
+<a class="reference internal" href="mbmp.server.html#mbmp.server.TimblServer" title="mbmp.server.TimblServer"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.server.TimblServer</span></tt></a> but expects an original timblserver running
+at some host and port.</p>
+<dl class="class">
+<dt id="mbmp.client.TimblClient">
+<em class="property">class </em><tt class="descclassname">mbmp.client.</tt><tt class="descname">TimblClient</tt><big>(</big><em>host='localhost'</em>, <em>port=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#TimblClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.TimblClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A client for communicating with the TimblServer.</p>
+<dl class="method">
+<dt id="mbmp.client.TimblClient.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#TimblClient.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.TimblClient.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the connection between the client and the server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.client.TimblClient.connect">
+<tt class="descname">connect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#TimblClient.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.TimblClient.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to the server at the tcp communicating port.</p>
+<p>Raises: ConnectionError if no connection can be made.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.client.TimblClient.query">
+<tt class="descname">query</tt><big>(</big><em>query</em><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#TimblClient.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.TimblClient.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a query to the listening server.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>query (str): the query to be send to the timblserver.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>str &#8211; The answer of the timblserver.</dd>
+<dt>Raises:</dt>
+<dd>socket.error: Server is not running</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.client.TimblClient.reconnect">
+<tt class="descname">reconnect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#TimblClient.reconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.TimblClient.reconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to reconnect the client to the server.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.client.format_answer">
+<tt class="descclassname">mbmp.client.</tt><tt class="descname">format_answer</tt><big>(</big><em>answer</em><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#format_answer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.format_answer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all information except the outcome class from the servers response.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>answer (str): the answer returned by the timblserver</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.client.format_query">
+<tt class="descclassname">mbmp.client.</tt><tt class="descname">format_query</tt><big>(</big><em>query</em><big>)</big><a class="reference internal" href="_modules/mbmp/client.html#format_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.client.format_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the query into the format required by the TimblServer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>query (str): the query send to the timblserver.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.commandline">
+<span id="commandline-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">commandline</span></tt> Module<a class="headerlink" href="#module-mbmp.commandline" title="Permalink to this headline">¶</a></h2>
+<p>Commandline interface to mbmp.</p>
+<dl class="class">
+<dt id="mbmp.commandline.CommandLine">
+<em class="property">class </em><tt class="descclassname">mbmp.commandline.</tt><tt class="descname">CommandLine</tt><a class="reference internal" href="_modules/mbmp/commandline.html#CommandLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.commandline.CommandLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">argparse.ArgumentParser</span></tt></p>
+<p>Commandline options for mbmp.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.commandline.demo">
+<tt class="descclassname">mbmp.commandline.</tt><tt class="descname">demo</tt><big>(</big><em>draw_parses=None</em>, <em>print_parses=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/commandline.html#demo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.commandline.demo" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple demo showing some basic functionality.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.commandline.main">
+<tt class="descclassname">mbmp.commandline.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/commandline.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.commandline.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.config">
+<span id="config-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">config</span></tt> Module<a class="headerlink" href="#module-mbmp.config" title="Permalink to this headline">¶</a></h2>
+<p>Configuration for mbmp. All options can be changed here or they
+can be overwritten in an interactive session or in your own
+scripts.</p>
+</div>
+<div class="section" id="module-mbmp.datatypes">
+<span id="datatypes-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">datatypes</span></tt> Module<a class="headerlink" href="#module-mbmp.datatypes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.datatypes.Morpheme">
+<em class="property">class </em><tt class="descclassname">mbmp.datatypes.</tt><tt class="descname">Morpheme</tt><big>(</big><em>token=''</em>, <em>pos=None</em>, <em>lemma=''</em><big>)</big><a class="reference internal" href="_modules/mbmp/datatypes.html#Morpheme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.datatypes.Morpheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A data class representing a morpheme. Each morpheme specifies
+a token form, a lemma form and its part-of-speech tag.</p>
+<dl class="method">
+<dt id="mbmp.datatypes.Morpheme.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>mrepr='tokens-and-lemmas'</em><big>)</big><a class="reference internal" href="_modules/mbmp/datatypes.html#Morpheme.pprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.datatypes.Morpheme.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representation of the morpheme.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>mrepr: Choose a morpheme representation:</dt>
+<dd><ul class="first last">
+<li><p class="first">tokens = token representation</p>
+</li>
+<li><p class="first">lemmas = lemma representation</p>
+</li>
+<li><dl class="first docutils">
+<dt>tokens-and-lemmas = token and lemma representation</dt>
+<dd><p class="first last">separated by a &#8216;=&#8217; character (zett=zet)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Example usage::</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Morpheme</span><span class="p">(</span><span class="s">&#39;clapp&#39;</span><span class="p">,</span> <span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="s">&#39;clap&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">mrepr</span><span class="o">=</span><span class="s">&#39;tokens&#39;</span><span class="p">)</span>
+<span class="go">clapp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">mrepr</span><span class="o">=</span><span class="s">&#39;lemmas&#39;</span><span class="p">)</span>
+<span class="go">clap</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">mrepr</span><span class="o">=</span><span class="s">&#39;tokens-and-lemmas&#39;</span><span class="p">)</span>
+<span class="go">clapp=clap</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.evaluation">
+<span id="evaluation-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">evaluation</span></tt> Module<a class="headerlink" href="#module-mbmp.evaluation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.evaluation.ParseEval">
+<em class="property">class </em><tt class="descclassname">mbmp.evaluation.</tt><tt class="descname">ParseEval</tt><big>(</big><em>gold</em>, <em>parses</em>, <em>eval_fn=&lt;function list_brackets at 0x73f9320&gt;</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#ParseEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.ParseEval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="mbmp.evaluation.ParseEval.f_score">
+<tt class="descname">f_score</tt><big>(</big><em>precision</em>, <em>recall</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#ParseEval.f_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.ParseEval.f_score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.evaluation.ParseEval.precision">
+<tt class="descname">precision</tt><big>(</big><em>ignore_labels=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#ParseEval.precision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.ParseEval.precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.evaluation.ParseEval.print_scores">
+<tt class="descname">print_scores</tt><big>(</big><em>ignore_labels=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#ParseEval.print_scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.ParseEval.print_scores" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mbmp.evaluation.ParseEval.recall">
+<tt class="descname">recall</tt><big>(</big><em>ignore_labels=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#ParseEval.recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.ParseEval.recall" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.evaluation.list_brackets">
+<tt class="descclassname">mbmp.evaluation.</tt><tt class="descname">list_brackets</tt><big>(</big><em>tree</em>, <em>ignore_labels=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#list_brackets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.list_brackets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.evaluation.list_lemmas">
+<tt class="descclassname">mbmp.evaluation.</tt><tt class="descname">list_lemmas</tt><big>(</big><em>parse</em>, <em>ignore_labels=False</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#list_lemmas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.list_lemmas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.evaluation.list_segments">
+<tt class="descclassname">mbmp.evaluation.</tt><tt class="descname">list_segments</tt><big>(</big><em>parse</em>, <em>ignore_labels=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#list_segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.list_segments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.evaluation.words_to_indexes">
+<tt class="descclassname">mbmp.evaluation.</tt><tt class="descname">words_to_indexes</tt><big>(</big><em>tree</em><big>)</big><a class="reference internal" href="_modules/mbmp/evaluation.html#words_to_indexes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.evaluation.words_to_indexes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new tree based on the original tree, such that the leaf values
+are replaced by their indexs.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.mbmp_exceptions">
+<span id="mbmp-exceptions-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">mbmp_exceptions</span></tt> Module<a class="headerlink" href="#module-mbmp.mbmp_exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="mbmp.mbmp_exceptions.ConnectionError">
+<em class="property">exception </em><tt class="descclassname">mbmp.mbmp_exceptions.</tt><tt class="descname">ConnectionError</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mbmp/mbmp_exceptions.html#ConnectionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.mbmp_exceptions.ConnectionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Exception used to catch connection errors with the timbl server.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mbmp.mbmp_exceptions.ServerConnectionError">
+<em class="property">exception </em><tt class="descclassname">mbmp.mbmp_exceptions.</tt><tt class="descname">ServerConnectionError</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/mbmp/mbmp_exceptions.html#ServerConnectionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.mbmp_exceptions.ServerConnectionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.mbmp_exceptions.ConnectionError" title="mbmp.mbmp_exceptions.ConnectionError"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.mbmp_exceptions.ConnectionError</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mbmp.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.util.tree_to_xml">
+<tt class="descclassname">mbmp.util.</tt><tt class="descname">tree_to_xml</tt><big>(</big><em>tree</em><big>)</big><a class="reference internal" href="_modules/mbmp/util.html#tree_to_xml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.util.tree_to_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a NLTK Tree object into xml tree using lxml.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.util.xml">
+<tt class="descclassname">mbmp.util.</tt><tt class="descname">xml</tt><big>(</big><em>treelist</em>, <em>ids=False</em>, <em>encoding='utf-8'</em>, <em>xml_decl=True</em>, <em>pp=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/util.html#xml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.util.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of Trees into an xml structure.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mbmp.classifiers.html">classifiers Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.classifiers.html#id1"><tt class="docutils literal"><span class="pre">classifiers</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.classifiers.html#module-mbmp.classifiers.api"><tt class="docutils literal"><span class="pre">api</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.classifiers.html#module-mbmp.classifiers.classifier"><tt class="docutils literal"><span class="pre">classifier</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.classifiers.html#module-mbmp.classifiers.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mbmp.parse.html">parse Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.parse.html#id1"><tt class="docutils literal"><span class="pre">parse</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.parse.html#module-mbmp.parse.parse"><tt class="docutils literal"><span class="pre">parse</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.parse.html#module-mbmp.parse.pparse"><tt class="docutils literal"><span class="pre">pparse</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.parse.html#module-mbmp.parse.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mbmp.server.html">server Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.server.html#id1"><tt class="docutils literal"><span class="pre">server</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.server.html#module-mbmp.server.server"><tt class="docutils literal"><span class="pre">server</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.server.html#module-mbmp.server.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mbmp.train.html">train Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.train.html#id1"><tt class="docutils literal"><span class="pre">train</span></tt> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.train.html#module-mbmp.train.mbmptrain"><tt class="docutils literal"><span class="pre">mbmptrain</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.train.html#module-mbmp.train.transform"><tt class="docutils literal"><span class="pre">transform</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mbmp.train.html#module-mbmp.train.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">mbmp Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">mbmp</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-mbmp.client"><tt class="docutils literal"><span class="pre">client</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.commandline"><tt class="docutils literal"><span class="pre">commandline</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.config"><tt class="docutils literal"><span class="pre">config</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.datatypes"><tt class="docutils literal"><span class="pre">datatypes</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.evaluation"><tt class="docutils literal"><span class="pre">evaluation</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.mbmp_exceptions"><tt class="docutils literal"><span class="pre">mbmp_exceptions</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to mbmp&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mbmp.classifiers.html"
+                        title="next chapter">classifiers Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mbmp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.classifiers.html" title="classifiers Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to mbmp’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

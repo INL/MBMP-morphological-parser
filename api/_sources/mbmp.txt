@@ -1,0 +1,77 @@
+mbmp Package
+============
+
+:mod:`mbmp` Package
+-------------------
+
+.. automodule:: mbmp.__init__
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`client` Module
+--------------------
+
+.. automodule:: mbmp.client
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`commandline` Module
+-------------------------
+
+.. automodule:: mbmp.commandline
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`config` Module
+--------------------
+
+.. automodule:: mbmp.config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`datatypes` Module
+-----------------------
+
+.. automodule:: mbmp.datatypes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`evaluation` Module
+------------------------
+
+.. automodule:: mbmp.evaluation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`mbmp_exceptions` Module
+-----------------------------
+
+.. automodule:: mbmp.mbmp_exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. automodule:: mbmp.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    mbmp.classifiers
+    mbmp.parse
+    mbmp.server
+    mbmp.train
+

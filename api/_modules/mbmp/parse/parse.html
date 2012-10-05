@@ -1,0 +1,240 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.parse.parse &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../../index.html" />
+    <link rel="up" title="mbmp.parse" href="../parse.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../parse.html" accesskey="U">mbmp.parse</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.parse.parse</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="kn">from</span> <span class="nn">nltk.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
+<span class="kn">from</span> <span class="nn">nltk.grammar</span> <span class="kn">import</span> <span class="n">Nonterminal</span><span class="p">,</span> <span class="n">ContextFreeGrammar</span>
+<span class="kn">from</span> <span class="nn">nltk.parse.chart</span> <span class="kn">import</span> <span class="n">AbstractChartRule</span><span class="p">,</span> <span class="n">ChartParser</span><span class="p">,</span> <span class="n">BU_STRATEGY</span>
+<span class="kn">from</span> <span class="nn">nltk.parse.chart</span> <span class="kn">import</span> <span class="n">LeafEdge</span><span class="p">,</span> <span class="n">TreeEdge</span>
+<span class="kn">from</span> <span class="nn">nltk.parse.pchart</span> <span class="kn">import</span> <span class="n">ProbabilisticTreeEdge</span>
+
+<span class="kn">from</span> <span class="nn">mbmp.parse.util</span> <span class="kn">import</span> <span class="n">post_process_tree</span>
+
+
+<span class="k">def</span> <span class="nf">is_lexical</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test whether an item contains lexical information.</span>
+<span class="sd">    Items are considered lexical when they have the format TAG:leaf.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - item (:class:`nltk.TreeEdge`): a (Probabilistic) tree edge</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Boolean -- is this treeedge lexical or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="n">TreeEdge</span><span class="p">,</span> <span class="n">ProbabilisticTreeEdge</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="s">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;x&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="RightHandRule"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.RightHandRule">[docs]</a><span class="k">class</span> <span class="nc">RightHandRule</span><span class="p">(</span><span class="n">AbstractChartRule</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A rule that joins two adjacent edges together into a single combined edge.</span>
+<span class="sd">    In particular, this rule states that any pair of edges that are not</span>
+<span class="sd">    lexical (see :func:`is_lexical`) can be joined resulting in a new edge</span>
+<span class="sd">    in which the left-hand-side is taken from the right edge and the right-</span>
+<span class="sd">    hand-side is the adjunction of the left-hand-side of the left and right</span>
+<span class="sd">    edge.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NUM_EDGES</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="RightHandRule.apply_iter"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.RightHandRule.apply_iter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chart</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">right_edge</span><span class="o">.</span><span class="n">is_incomplete</span><span class="p">()</span> <span class="ow">or</span>       <span class="c"># use only completed edges</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_edge</span><span class="p">,</span> <span class="n">LeafEdge</span><span class="p">)</span> <span class="ow">or</span> <span class="c"># skip terminal leaves</span>
+            <span class="n">is_lexical</span><span class="p">(</span><span class="n">right_edge</span><span class="p">)</span> <span class="ow">or</span>           <span class="c"># skip lexical productions</span>
+            <span class="n">right_edge</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;G&#39;</span><span class="p">):</span>  <span class="c"># skip BRM rules</span>
+            <span class="k">return</span>
+        <span class="c"># We only merge if both the right end left edge are completed. The</span>
+        <span class="c"># left edge must be adjacent to the right edge in the chart.</span>
+        <span class="k">for</span> <span class="n">left_edge</span> <span class="ow">in</span> <span class="n">chart</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">end</span><span class="o">=</span><span class="n">right_edge</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">is_complete</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_edge</span><span class="p">,</span> <span class="n">LeafEdge</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_lexical</span><span class="p">(</span><span class="n">left_edge</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">new_edge</span> <span class="o">=</span> <span class="n">TreeEdge</span><span class="p">(</span><span class="n">span</span><span class="o">=</span><span class="p">(</span><span class="n">left_edge</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">right_edge</span><span class="o">.</span><span class="n">end</span><span class="p">()),</span>
+                                <span class="n">lhs</span><span class="o">=</span><span class="n">right_edge</span><span class="o">.</span><span class="n">lhs</span><span class="p">(),</span>
+                                <span class="n">rhs</span><span class="o">=</span><span class="p">[</span><span class="n">left_edge</span><span class="o">.</span><span class="n">lhs</span><span class="p">(),</span> <span class="n">right_edge</span><span class="o">.</span><span class="n">lhs</span><span class="p">()],</span>
+                                <span class="n">dot</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c"># edge is completed at initialization</span>
+            <span class="k">if</span> <span class="n">chart</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">new_edge</span><span class="p">,</span> <span class="p">(</span><span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">)):</span>
+                <span class="k">yield</span> <span class="n">new_edge</span>
+
+
+<span class="c"># we use the standard Bottom-Up Parse strategy and add the Right-Hand-Rule to it</span></div></div>
+<span class="n">BU_RHR_STRATEGY</span> <span class="o">=</span> <span class="n">BU_STRATEGY</span> <span class="o">+</span> <span class="p">[</span><span class="n">RightHandRule</span><span class="p">()]</span>
+
+
+<div class="viewcode-block" id="MbmaParser"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.MbmaParser">[docs]</a><span class="k">class</span> <span class="nc">MbmaParser</span><span class="p">(</span><span class="n">ChartParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A ChartParser using a bottom-up parsing strategy plus the Right Hand Rule.</span>
+<span class="sd">    See :func:`RightHandRule` for more information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">parser_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor. Initializes a MbmaParser.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - parser_args: needs a keyword grammar which is of</span>
+<span class="sd">                type :class:`ContextFreeGrammar`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ChartParser</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[],</span> <span class="n">BU_RHR_STRATEGY</span><span class="p">,</span> <span class="o">**</span><span class="n">parser_args</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MbmaParser.set_grammar"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.MbmaParser.set_grammar">[docs]</a>    <span class="k">def</span> <span class="nf">set_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asign a new grammar to the parser</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - parser_args: needs grammar of type :class:`ContextFreeGrammar`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">ContextFreeGrammar</span><span class="p">(</span><span class="n">Nonterminal</span><span class="p">(</span><span class="s">&#39;S&#39;</span><span class="p">),</span> <span class="n">grammar</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MbmaParser.nbest_parse"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.MbmaParser.nbest_parse">[docs]</a>    <span class="k">def</span> <span class="nf">nbest_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">post_process</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the nbest parses for the given word.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str or list): a list or string of morphemes</span>
+<span class="sd">            - n (int): how many parses should be returned</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of trees</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">chart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chart_parse</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="n">trees</span> <span class="o">=</span> <span class="p">[</span><span class="n">tree</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">chart</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+                 <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">chart</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">complete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">Tree</span><span class="p">)][:</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">post_process</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">:</span>
+                <span class="n">post_process_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">trees</span>
+
+</div></div>
+<div class="viewcode-block" id="demo"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.parse.demo">[docs]</a><span class="k">def</span> <span class="nf">demo</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A demo showing some basic functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">mbmp.parse.util</span> <span class="kn">import</span> <span class="n">make_grammar</span>
+    <span class="kn">from</span> <span class="nn">mbmp.datatypes</span> <span class="kn">import</span> <span class="n">Morpheme</span>
+    <span class="n">parse</span> <span class="o">=</span> <span class="p">[</span><span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;V|*V&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;ver&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;ver&#39;</span><span class="p">),</span>
+             <span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;eis&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;eis&#39;</span><span class="p">),</span>
+             <span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;V|VINFL&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;t&#39;</span><span class="p">)]</span>
+    <span class="k">print</span> <span class="s">&#39;Parse produced by MBMA:&#39;</span>
+    <span class="k">print</span> <span class="n">parse</span>
+    <span class="k">print</span>
+    <span class="k">print</span> <span class="s">&#39;Compiling grammar rules from parse...&#39;</span>
+    <span class="n">productions</span> <span class="o">=</span> <span class="n">make_grammar</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="n">productions</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">prod</span>
+    <span class="k">print</span>
+    <span class="k">print</span> <span class="s">&#39;Parsing word &quot;ver eis t&quot;&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">MbmaParser</span><span class="p">(</span><span class="n">productions</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">nbest_parse</span><span class="p">(</span><span class="s">&#39;ver eis t&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+        <span class="k">print</span> <span class="n">tree</span>
+</div>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;MbmaParser&#39;</span><span class="p">,</span> <span class="s">&#39;BU_RHR_STRATEGY&#39;</span><span class="p">,</span> <span class="s">&#39;RightHandRule&#39;</span><span class="p">,</span> <span class="s">&#39;demo&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">demo</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../parse.html" >mbmp.parse</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.commandline &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.commandline</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Commandline interface to mbmp.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">mbmp.config</span> <span class="kn">as</span> <span class="nn">config</span>
+<span class="kn">from</span> <span class="nn">mbmp.classifiers</span> <span class="kn">import</span> <span class="n">MBMA</span><span class="p">,</span> <span class="n">MBMS</span><span class="p">,</span> <span class="n">MBMC</span><span class="p">,</span> <span class="n">MBLEM</span><span class="p">,</span> <span class="n">MBPT</span>
+<span class="kn">from</span> <span class="nn">mbmp.parse</span> <span class="kn">import</span> <span class="n">MbmaParser</span><span class="p">,</span> <span class="n">MbmaCKYParser</span>
+
+
+<div class="viewcode-block" id="demo"><a class="viewcode-back" href="../../mbmp.html#mbmp.commandline.demo">[docs]</a><span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">draw_parses</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">print_parses</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple demo showing some basic functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">demos</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;aandeelhoudersvergadering&#39;</span><span class="p">,</span> <span class="s">&#39;hardloopwedstrijd&#39;</span><span class="p">]</span>
+    <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="n">MBMA</span><span class="p">()</span> <span class="k">as</span> <span class="n">program</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">demos</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Parsing: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">word</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="n">trees</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">draw_parses</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">print</span>
+        <span class="k">print</span> <span class="s">&#39;Draw parses (y/n)?&#39;</span><span class="p">,</span>
+        <span class="n">draw_parses</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">draw_parses</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">nltk.draw.tree</span> <span class="kn">import</span> <span class="n">draw_trees</span>
+        <span class="k">print</span> <span class="s">&#39;  please wait...&#39;</span>
+        <span class="n">draw_trees</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">print_parses</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">print</span>
+        <span class="k">print</span> <span class="s">&#39;Print parses (y/n)?&#39;</span><span class="p">,</span>
+        <span class="n">print_parses</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">print_parses</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">parse</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">parse</span>
+</div>
+<div class="viewcode-block" id="CommandLine"><a class="viewcode-back" href="../../mbmp.html#mbmp.commandline.CommandLine">[docs]</a><span class="k">class</span> <span class="nc">CommandLine</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Commandline options for mbmp.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span> <span class="o">=</span> <span class="s">&#39;mbmp&#39;</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">            Memory-Based Morphological Parsing (MBMP), an implementation of</span>
+<span class="s">            MBMA with extended functionality in Python based on</span>
+<span class="s">            Van den Bosch &amp; Daelemans (1999).</span>
+
+<span class="s">            For more options, see the config.py file.&#39;&#39;&#39;</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;-f&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;trainingfile&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the trainingfile.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;instancebase&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the instance-base.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;testfile&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;The path pointing to the testfile.</span>
+<span class="s">            File must consist of one word per line&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;output&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">),</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the output file.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;process&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="s">&#39;parse&#39;</span><span class="p">,</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s">&#39;parse&#39;</span><span class="p">,</span> <span class="s">&#39;segmentize&#39;</span><span class="p">,</span> <span class="s">&#39;lemmatize&#39;</span><span class="p">,</span> <span class="s">&#39;pos-tagging&#39;</span><span class="p">,</span> <span class="s">&#39;chunk&#39;</span><span class="p">],</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Choose what classification to perform.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;--parser&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;parser&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;pcfg&#39;</span><span class="p">,</span> <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cfg&#39;</span><span class="p">,</span> <span class="s">&#39;pcfg&#39;</span><span class="p">],</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Choose what parser to use.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;--lemmatize&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;morph_repr&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;token&#39;</span><span class="p">,</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;tokens&#39;</span><span class="p">,</span> <span class="s">&#39;lemmas&#39;</span><span class="p">,</span> <span class="s">&#39;tokens-and-lemmas&#39;</span><span class="p">],</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Choose how te represent the morphemes in the printed</span>
+<span class="s">            trees. &quot;lemmas&quot; returns a lemmatized representation of the</span>
+<span class="s">            morphemes, &quot;tokens&quot; returns the original segmentation of the</span>
+<span class="s">            morphemes and &quot;tokens-and-lemmas&quot; returns a representation like</span>
+<span class="s">            token=lemma.&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;--pprint&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;print_tree&#39;</span><span class="p">,</span> <span class="n">action</span> <span class="o">=</span> <span class="s">&#39;store_const&#39;</span><span class="p">,</span>
+            <span class="n">const</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Return a (pretty) hierarchical tree  representation of</span>
+<span class="s">            the parse (only works with option &#39;parse&#39; and &#39;chunk&#39;).&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;--port&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&quot;port&quot;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;The tcp port for timblserver&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(prog)s</span><span class="s"> 0.3&#39;</span><span class="p">)</span>
+            
+            </div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../mbmp.html#mbmp.commandline.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">CommandLine</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c"># setup the chosen classifier and load the appropriate configuration</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;parse&#39;</span><span class="p">:</span>
+        <span class="n">classifier</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">MBMA</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MBMA_CONFIG</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;chunk&#39;</span><span class="p">:</span>
+        <span class="n">classifier</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">MBMC</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MBMC_CONFIG</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;segmentize&#39;</span><span class="p">:</span>
+        <span class="n">classifier</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">MBMS</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MBMS_CONFIG</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;lemmatize&#39;</span><span class="p">:</span>
+        <span class="n">classifier</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">MBLEM</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MBLEM_CONFIG</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;pos-tagging&#39;</span><span class="p">:</span>
+        <span class="n">classifier</span><span class="p">,</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">MBPT</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MBPT_CONFIG</span>
+
+    <span class="c"># if another PORT is chosen, set it in CONFIG</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">PORT</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">port</span>
+        
+    <span class="c"># check if trainingfile or instancebase is an existing file and</span>
+    <span class="c"># add this to the configuration. If no file is given we stick</span>
+    <span class="c"># to the default file with that comes with a particular classifier</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">trainingfile</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">trainingfile</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;Trainingfile not found&#39;</span><span class="p">)</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s">&#39;f&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">trainingfile</span>
+        <span class="k">del</span> <span class="n">settings</span><span class="p">[</span><span class="s">&#39;i&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">instancebase</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">instancebase</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;Instancebase not found&#39;</span><span class="p">)</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s">&#39;i&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">instancebase</span>
+
+    <span class="c"># if hierarchical parsing is chosen, initialize the parser</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;parse&#39;</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">print_tree</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">parser</span> <span class="o">==</span> <span class="s">&#39;cfg&#39;</span><span class="p">:</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">MbmaParser</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Loading PCFG...</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">MbmaCKYParser</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c"># initialize the classifier (best to do this in a with-statement</span>
+    <span class="c"># so that in case of any unexpected errors, the timbl server is killed.)</span>
+    <span class="k">with</span> <span class="n">classifier</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">HOST</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">PORT</span><span class="p">,</span>
+                    <span class="n">settings</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">)</span> <span class="k">as</span> <span class="n">program</span><span class="p">:</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count_limit</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">BOM_UTF8</span><span class="p">)</span>
+        <span class="c"># process all words each at a time</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">testfile</span><span class="p">,</span>
+                                             <span class="n">encoding</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)):</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s">&#39; &#39;</span> <span class="ow">in</span> <span class="n">word</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s">&#39;No spaces allowed within words! skipping </span><span class="si">%r</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">word</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">print_tree</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;parse&#39;</span><span class="p">,</span> <span class="s">&#39;chunk&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;parse&#39;</span><span class="p">:</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s">u&#39;# {0} {1}:</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+                    <span class="n">trees</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">mrepr</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">morph_repr</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">trees</span><span class="p">:</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                            <span class="s">u&#39;   {0} {1}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="mi">1</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">results</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">tree</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trees</span><span class="p">):</span>
+                            <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                                <span class="s">u&#39;   {0} {1}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s">u&#39;# {0} {1}:</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+                    <span class="n">trees</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s">u&#39;# {0}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">trees</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">process</span> <span class="o">==</span> <span class="s">&#39;pos-tagging&#39;</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s">u&#39;{0}</span><span class="se">\t</span><span class="s">{1}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s">u&#39;# {0} {1}</span><span class="se">\t</span><span class="s">{2}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">i</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">results</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="n">count_limit</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s">&#39;Processed: {0} words @ {1}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">counter</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">()))</span>
+                <span class="n">count_limit</span> <span class="o">*=</span> <span class="mi">2</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

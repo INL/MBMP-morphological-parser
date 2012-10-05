@@ -1,0 +1,235 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.evaluation &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.evaluation</h1><div class="highlight"><pre>
+<span class="c"># Evaluate morphological segmentation and detection of morphemes</span>
+
+<span class="c"># Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c"># Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c"># URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c"># For licence information, see LICENCE.TXT</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">Tree</span>
+
+<div class="viewcode-block" id="words_to_indexes"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.words_to_indexes">[docs]</a><span class="k">def</span> <span class="nf">words_to_indexes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a new tree based on the original tree, such that the leaf values</span>
+<span class="sd">    are replaced by their indexs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">leaves</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">leaves</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaves</span><span class="p">)):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">leaf_treeposition</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">out</span>
+</div>
+<div class="viewcode-block" id="list_brackets"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.list_brackets">[docs]</a><span class="k">def</span> <span class="nf">list_brackets</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">tr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ignore_labels</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;ignore&#39;</span>
+        <span class="k">return</span> <span class="n">tr</span><span class="o">.</span><span class="n">node</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i_tree</span> <span class="o">=</span> <span class="n">words_to_indexes</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subtree</span> <span class="ow">in</span> <span class="n">i_tree</span><span class="o">.</span><span class="n">subtrees</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">right_pos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">leaves</span><span class="p">()[:</span><span class="n">subtree</span><span class="o">.</span><span class="n">leaves</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">left_pos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">leaves</span><span class="p">()[:</span><span class="n">subtree</span><span class="o">.</span><span class="n">leaves</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]))</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">right_pos</span><span class="p">,</span> <span class="n">left_pos</span><span class="p">,</span> <span class="n">label</span><span class="p">(</span><span class="n">subtree</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">out</span>
+    <span class="c"># return [(firstleaf(sub), lastleaf(sub), label(sub)) for sub in</span>
+    <span class="c">#         i_tree.subtrees(filter = lambda t: t.height() &gt; 1)]</span>
+</div>
+<div class="viewcode-block" id="list_segments"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.list_segments">[docs]</a><span class="k">def</span> <span class="nf">list_segments</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="n">leaf</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ignore_labels</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;ignore&#39;</span>
+        <span class="k">return</span> <span class="n">leaf</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">parse</span><span class="o">.</span><span class="n">leaves</span><span class="p">():</span>
+        <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pos</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">),</span> <span class="n">label</span><span class="p">(</span><span class="n">segment</span><span class="p">)))</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">segments</span>
+</div>
+<div class="viewcode-block" id="list_lemmas"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.list_lemmas">[docs]</a><span class="k">def</span> <span class="nf">list_lemmas</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">parse</span><span class="o">.</span><span class="n">leaves</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ParseEval"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.ParseEval">[docs]</a><span class="k">class</span> <span class="nc">ParseEval</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gold</span><span class="p">,</span> <span class="n">parses</span><span class="p">,</span> <span class="n">eval_fn</span> <span class="o">=</span> <span class="n">list_brackets</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gold</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parses</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Number of parses is unequal&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gold</span> <span class="o">=</span> <span class="n">gold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parses</span> <span class="o">=</span> <span class="n">parses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_fn</span> <span class="o">=</span> <span class="n">eval_fn</span>
+
+    <span class="k">def</span> <span class="nf">_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">compared</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">successes</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">compared</span><span class="p">):</span>
+            <span class="n">a_brackets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_fn</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="p">)</span>
+            <span class="n">b_brackets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_fn</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="n">a_brackets</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">bracket</span> <span class="ow">in</span> <span class="n">b_brackets</span><span class="p">:</span>
+                    <span class="n">successes</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b_brackets</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">successes</span> <span class="o">/</span> <span class="n">total</span>
+
+<div class="viewcode-block" id="ParseEval.precision"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.ParseEval.precision">[docs]</a>    <span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parses</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParseEval.recall"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.ParseEval.recall">[docs]</a>    <span class="k">def</span> <span class="nf">recall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parses</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gold</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParseEval.f_score"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.ParseEval.f_score">[docs]</a>    <span class="k">def</span> <span class="nf">f_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">((</span><span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="ParseEval.print_scores"><a class="viewcode-back" href="../../mbmp.html#mbmp.evaluation.ParseEval.print_scores">[docs]</a>    <span class="k">def</span> <span class="nf">print_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">(</span><span class="n">ignore_labels</span><span class="o">=</span><span class="n">ignore_labels</span><span class="p">)</span>
+        <span class="n">recall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall</span><span class="p">(</span><span class="n">ignore_labels</span><span class="o">=</span><span class="n">ignore_labels</span><span class="p">)</span>
+        <span class="n">f_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_score</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;Evaluating&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_fn</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> 
+        <span class="k">print</span> <span class="s">&#39;(labels was&#39;</span><span class="p">,</span> <span class="s">&#39;unset)&#39;</span> <span class="k">if</span> <span class="n">ignore_labels</span> <span class="k">else</span> <span class="s">&#39;set)&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;-&#39;</span><span class="o">*</span><span class="mi">40</span>
+        <span class="k">print</span> <span class="s">&#39;Precision:&#39;</span><span class="p">,</span> <span class="n">precision</span>
+        <span class="k">print</span> <span class="s">&#39;   Recall:&#39;</span><span class="p">,</span> <span class="n">recall</span>
+        <span class="k">print</span> <span class="s">&#39;  F-score:&#39;</span><span class="p">,</span> <span class="n">f_score</span>
+        <span class="k">print</span> <span class="s">&#39;-&#39;</span><span class="o">*</span><span class="mi">40</span>
+        <span class="k">print</span>
+
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        Evaluate the quality of segmentation. Calculates the precision</span>
+<span class="s">        recall and F-score for the segmentation of words into morphemes.</span>
+
+<span class="s">        Input file must be a tab-separated file with the gold standard</span>
+<span class="s">        segmentations as the left column and the suggested segmentations</span>
+<span class="s">        as the right column.&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the file holding the segmentations.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;evaluation_type&#39;</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;brackets&#39;</span><span class="p">,</span> <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;brackets&#39;</span><span class="p">,</span> <span class="s">&#39;segments&#39;</span><span class="p">,</span> <span class="s">&#39;lemmas&#39;</span><span class="p">],</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;type of evaluation (one of &quot;brackets&quot; or &quot;segments&quot;)&#39;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">evaluation_type</span> <span class="o">==</span> <span class="s">&#39;brackets&#39;</span><span class="p">:</span>
+        <span class="n">evaluation_type</span> <span class="o">=</span> <span class="n">list_brackets</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">evaluation_type</span> <span class="o">==</span> <span class="s">&#39;lemmas&#39;</span><span class="p">:</span>
+        <span class="n">evaluation_type</span> <span class="o">=</span> <span class="n">list_lemmas</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">evaluation_type</span> <span class="o">=</span> <span class="n">list_segments</span>
+    <span class="n">gold_parses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">parses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">):</span>
+        <span class="n">gold</span><span class="p">,</span><span class="n">parse</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">evaluation_type</span> <span class="o">==</span> <span class="s">&#39;brackets&#39;</span> <span class="ow">and</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">gold</span><span class="o">.</span><span class="n">leaves</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parse</span><span class="o">.</span><span class="n">leaves</span><span class="p">())):</span>
+            <span class="k">print</span> <span class="s">&#39;Skipping analyses: unequal morphemes </span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gold</span><span class="p">,</span> <span class="n">parse</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gold</span><span class="o">.</span><span class="n">leaves</span><span class="p">())</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parse</span><span class="o">.</span><span class="n">leaves</span><span class="p">()):</span>
+            <span class="k">print</span> <span class="s">&#39;Skipping analyses: unequal input </span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">gold</span><span class="p">,</span> <span class="n">parse</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">gold_parses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gold</span><span class="p">)</span>
+        <span class="n">parses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">ParseEval</span><span class="p">(</span><span class="n">gold_parses</span><span class="p">,</span> <span class="n">parses</span><span class="p">)</span><span class="o">.</span><span class="n">scores</span><span class="p">()</span>
+    <span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">f_score</span><span class="p">,</span> <span class="n">l_precision</span><span class="p">,</span> <span class="n">l_recall</span><span class="p">,</span> <span class="n">l_f_score</span> <span class="o">=</span> <span class="n">scores</span>
+    <span class="k">print</span> <span class="s">&#39;precision: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">precision</span>
+    <span class="k">print</span> <span class="s">&#39;recall: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">recall</span>
+    <span class="k">print</span> <span class="s">&#39;F-score: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">f_score</span>
+    <span class="k">print</span>
+    <span class="k">print</span> <span class="s">&#39;labeled precision: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">l_precision</span>
+    <span class="k">print</span> <span class="s">&#39;labeled recall: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">l_recall</span>
+    <span class="k">print</span> <span class="s">&#39;labeled F-score: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">l_f_score</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

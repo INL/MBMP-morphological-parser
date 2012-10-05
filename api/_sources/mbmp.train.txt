@@ -1,0 +1,35 @@
+train Package
+=============
+
+:mod:`train` Package
+--------------------
+
+.. automodule:: mbmp.train
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`mbmptrain` Module
+-----------------------
+
+.. automodule:: mbmp.train.mbmptrain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`transform` Module
+-----------------------
+
+.. automodule:: mbmp.train.transform
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. automodule:: mbmp.train.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

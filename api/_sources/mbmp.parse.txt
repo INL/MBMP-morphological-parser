@@ -1,0 +1,35 @@
+parse Package
+=============
+
+:mod:`parse` Package
+--------------------
+
+.. automodule:: mbmp.parse
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`parse` Module
+-------------------
+
+.. automodule:: mbmp.parse.parse
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`pparse` Module
+--------------------
+
+.. automodule:: mbmp.parse.pparse
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`util` Module
+------------------
+
+.. automodule:: mbmp.parse.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

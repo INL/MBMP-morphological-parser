@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.classifiers.classifier &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../../index.html" />
+    <link rel="up" title="mbmp.classifiers" href="../classifiers.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../classifiers.html" accesskey="U">mbmp.classifiers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.classifiers.classifier</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implementation of various Memory-based Classifiers, such as</span>
+<span class="sd">Memory-based Morphological Analysis and Memory-based Lemmatization.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">mbmp.classifiers.api</span> <span class="kn">import</span> <span class="n">MBClassifier</span>
+<span class="kn">from</span> <span class="nn">mbmp.classifiers.util</span> <span class="kn">import</span> <span class="n">align</span><span class="p">,</span> <span class="n">to_input</span>
+<span class="kn">from</span> <span class="nn">mbmp.config</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mbmp.parse</span> <span class="kn">import</span> <span class="n">MbmaCKYParser</span>
+<span class="kn">from</span> <span class="nn">mbmp.parse.util</span> <span class="kn">import</span> <span class="n">make_grammar</span>
+<span class="kn">from</span> <span class="nn">mbmp.datatypes</span> <span class="kn">import</span> <span class="n">Morpheme</span>
+
+
+<div class="viewcode-block" id="MBMA"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMA">[docs]</a><span class="k">class</span> <span class="nc">MBMA</span><span class="p">(</span><span class="n">MBClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Memory-Based Morphological Analyzer. MBMA is a Memory-Based Classifier</span>
+<span class="sd">    that attempts to analyze words into their component parts. The classifier</span>
+<span class="sd">    splits the word into its containing morphemes and assigns a Part of</span>
+<span class="sd">    Speech tag to them. On the basis of the Part of Speech tags, MBMA uses a</span>
+<span class="sd">    special kind of :class:`mbmp.parse.CKYParser`</span>
+<span class="sd">    (:class:`mbmp.parse.MbmaCKYParser`) to construct hierarchical</span>
+<span class="sd">    morphological analyses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">MBMA_CONFIG</span><span class="p">,</span>
+                 <span class="n">parser</span><span class="o">=</span><span class="n">MbmaCKYParser</span><span class="p">):</span>
+        <span class="n">MBClassifier</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parser</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MBMA.classify"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMA.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each letter of WORD, classify its corresponding part-of-speech</span>
+<span class="sd">        tag.</span>
+
+<span class="sd">            &gt;&gt;&gt; classifier.classify(&#39;schoenlepel&#39;)</span>
+<span class="sd">            [Morpheme(token=&#39;schoen&#39;, lemma=&#39;schoen&#39;, pos=&#39;N&#39;),</span>
+<span class="sd">             Morpheme(token=&#39;lepel&#39;, lemma=&#39;lepel&#39;, pos=&#39;N&#39;)]</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of (tag, leaf) pairs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;UNK&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes</span><span class="p">):</span>
+            <span class="c"># split outcomes without POS or lemmatization operation</span>
+            <span class="c"># from those who have</span>
+            <span class="k">if</span> <span class="n">inst</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">token</span> <span class="o">+=</span> <span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lemma</span> <span class="o">+=</span> <span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c"># lemmatization operation up ahead</span>
+            <span class="k">elif</span> <span class="s">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">inst</span><span class="p">:</span>
+                <span class="c"># first collect the part-of-speech tag</span>
+                <span class="k">if</span> <span class="s">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">inst</span><span class="p">:</span>
+                    <span class="n">inst</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;@&#39;</span><span class="p">)</span>
+                    <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">))</span>
+                <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">token</span> <span class="o">+=</span> <span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lemma</span> <span class="o">+=</span> <span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c"># apply the lemmatization operation</span>
+                <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;INS&#39;</span><span class="p">):</span>
+                        <span class="c"># outcomes can contain diacritics, decode them</span>
+                        <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lemma</span> <span class="o">+=</span> <span class="n">tag</span><span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;DEL&#39;</span><span class="p">):</span>
+                        <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lemma</span> <span class="o">=</span> <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lemma</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">inst</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lemma</span><span class="o">=</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">parse</span>
+</div>
+<div class="viewcode-block" id="MBMA.pprint_parse"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMA.pprint_parse">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a pretty print of the classification.</span>
+
+<span class="sd">        Each (Tag, Leaf) pair is</span>
+<span class="sd">        printed as (Tag Leaf), i.e. the output for a word such as</span>
+<span class="sd">        &#39;aandeelhoudersvergadering&#39; could be::</span>
+
+<span class="sd">            &gt;&gt;&gt; classifier.pprint_parse(p)</span>
+<span class="sd">            (ADP aan) (NOU deel) (VRB houd) (SUF er)</span>
+<span class="sd">            (LE s)</span>
+<span class="sd">            (VRB vergader) (SUF ing)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - parse: the return value of :func:`mbmp.MBMA.classify` for a given word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A string representation of parse.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">lemma</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">parse</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MBMA.trees"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMA.trees">[docs]</a>    <span class="k">def</span> <span class="nf">trees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse</span><span class="p">,</span> <span class="n">nbest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">post_process</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mrepr</span><span class="o">=</span><span class="s">&#39;tokens&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a genartor of pretty printed Tree structures of the</span>
+<span class="sd">        classification.</span>
+<span class="sd">        </span>
+<span class="sd">        The output for a word such as `aandeelhoudersvergadering` is::</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; trees = classifier.trees(results)</span>
+<span class="sd">            &gt;&gt;&gt; for tree in trees:</span>
+<span class="sd">            ...    print tree</span>
+<span class="sd">            (NOU</span>
+<span class="sd">               (NOU (NOU (ADP aan) (NOU deel)) (VRB houd) (SUF er))</span>
+<span class="sd">               (LE s)</span>
+<span class="sd">               (NOU (VRB vergader) (SUF ing)))</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - parse: the return value of :func:`mbmp.MBMA.classify` for a given word.</span>
+<span class="sd">            - nbest (int): specify how many parses should be returned</span>
+<span class="sd">            - post_process (bool): perform some cleaning operation after parsing</span>
+<span class="sd">            - filter (function): a function used to filter certain trees</span>
+<span class="sd">            (function must return True or False)</span>
+<span class="sd">            - mrepr (str): specify how the leaves should be represented in the</span>
+<span class="sd">            Tree: options are: token forms (&#39;tokens&#39;), lemma forms</span>
+<span class="sd">            (&#39;lemmas&#39;) and tokens and lemmas (&#39;tokens-and-lemmas&#39;)</span>
+<span class="sd">        Yields:</span>
+<span class="sd">            the nbest parses</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">set_grammar</span><span class="p">(</span><span class="n">make_grammar</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">mrepr</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">nbest_parse</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">mrepr</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">parse</span><span class="p">],</span> <span class="n">nbest</span><span class="p">,</span> <span class="n">post_process</span><span class="p">,</span> <span class="nb">filter</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="MBMS"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMS">[docs]</a><span class="k">class</span> <span class="nc">MBMS</span><span class="p">(</span><span class="n">MBClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Memory-Based Morphological Segmentizer. MBMS is a Memory-Based Classifier</span>
+<span class="sd">    that attempts to analyze words into their component parts. The classifier</span>
+<span class="sd">    splits words into their containing segments. No Part of Speech is</span>
+<span class="sd">    assigned to the segments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">MBMS_CONFIG</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MBClassifier</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MBMS.classify"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMS.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each letter of WORD, classify whether it is the start of a</span>
+<span class="sd">        segment or not. Returns a list of letters of WORD in which letters</span>
+<span class="sd">        starting a new segment are preceded by the separation tag.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes</span><span class="p">):</span>
+            <span class="c"># &#39;0&#39; outcomes means that no segment is predicted.</span>
+            <span class="k">if</span> <span class="n">inst</span> <span class="o">!=</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+            <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">parse</span>
+</div>
+<div class="viewcode-block" id="MBMS.pprint_parse"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMS.pprint_parse">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a pretty print of the classified segmentations.</span>
+<span class="sd">        The segmentation tag is used as the separator of the segments, i.e.</span>
+<span class="sd">        if the segment tag &#39;+&#39; is used, the output for a word such as</span>
+<span class="sd">        `verlanglijstje` is::</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; parse = classifier.classify(&#39;verlanglijstje&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print classifier.pprint_parse(parse)</span>
+<span class="sd">            ver+lang+lijst+je</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - parse: the return value of :func:`mbmp.MBMA.classify` for a</span>
+<span class="sd">                given word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A string representation of parse.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MBMS.segmentize"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMS.segmentize">[docs]</a>    <span class="k">def</span> <span class="nf">segmentize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="MBMC"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMC">[docs]</a><span class="k">class</span> <span class="nc">MBMC</span><span class="p">(</span><span class="n">MBClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Memory-Based Morphological Chunker. MBMC is a Memory-Based Classifier</span>
+<span class="sd">    that attempts to analyze words into their component parts. The classifier</span>
+<span class="sd">    tries to return hierarchical morphological parses on the basis of</span>
+<span class="sd">    identified chunks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">MBMC_CONFIG</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MBClassifier</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MBMC.classify"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMC.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each letter of WORD, classify its corresponding chunk tag.</span>
+<span class="sd">        Returns a list of lists of leaf,part-of-speech,chunk-tag combinations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of (tag, leaf) pairs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">word</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">inst</span> <span class="o">!=</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">inst</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="n">parse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span><span class="p">)]</span><span class="o">+</span><span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">parse</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="MBMC.pprint_parse"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMC.pprint_parse">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a pretty print of the classified chunks.</span>
+<span class="sd">        A word such as ondankbaar is printed as::</span>
+
+<span class="sd">            on/PRE/O dank/VRB/B-VRB baar/SUF/I-VRB</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - chunks: the return value of :func:`mbmp.MBMC.classify` for</span>
+<span class="sd">                a given word</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A string representation of parse separated by &#39;/&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MBMC.trees"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBMC.trees">[docs]</a>    <span class="k">def</span> <span class="nf">trees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunks</span><span class="p">,</span> <span class="n">top_node</span><span class="o">=</span><span class="s">&#39;W&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all valid chunks as NLTK trees, i.e. a chunk parse such as::</span>
+<span class="sd">        </span>
+<span class="sd">            ver/PRE/B-VRB beter/ADJ/I-VRB baar/SUF/O</span>
+<span class="sd">            </span>
+<span class="sd">        is transformed into::</span>
+<span class="sd">        </span>
+<span class="sd">            (VRB (PRE ver) (ADJ beter)) (SUF baar)</span>
+<span class="sd">            </span>
+<span class="sd">        This method requires NLTK to be installed (see http://www.nltk.org).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - chunks: the return value of :func:`MBMC.classify` for a given word</span>
+<span class="sd">            - top_node (str): the label of the top node.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A hierarchical :class:`Tree`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">Tree</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Please install NLTK (www.nltk.org)&#39;</span>
+            <span class="k">raise</span>
+
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">Tree</span><span class="p">(</span><span class="n">top_node</span><span class="p">,</span> <span class="p">[])]</span>
+        <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;O&#39;</span><span class="p">):</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="s">&#39;O&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">state</span><span class="p">,</span> <span class="n">chunk</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)</span>
+            <span class="n">mismatch_I</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&#39;I&#39;</span> <span class="ow">and</span> <span class="n">chunk</span> <span class="o">!=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">node</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="s">&#39;BO&#39;</span> <span class="ow">or</span> <span class="n">mismatch_I</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&#39;B&#39;</span><span class="p">:</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="p">[</span><span class="n">word</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+</div></div>
+<div class="viewcode-block" id="MBLEM"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBLEM">[docs]</a><span class="k">class</span> <span class="nc">MBLEM</span><span class="p">(</span><span class="n">MBClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Memory-Based Lemmatizer. MBLEM is a Memory-Based Classifier</span>
+<span class="sd">    that attempts to lemmatize word forms. On the basis of a training file</span>
+<span class="sd">    with transformation rules to convert a wordform to a lemma, the</span>
+<span class="sd">    classifier tries to predect on a character basis the correct</span>
+<span class="sd">    transformation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">MBLEM_PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">MBLEM_CONFIG</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MBClassifier</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MBLEM.classify"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBLEM.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each letter of WORD, predict whether it can stay (same as in</span>
+<span class="sd">        LEMMA), must be deleted (not in LEMMA) or whether a character from</span>
+<span class="sd">        LEMMA must be inserted (not in WORD).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            a list of characters representing the predicted lemma.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parse</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">word</span><span class="p">)):</span>
+            <span class="c"># default add character to parse</span>
+            <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
+            <span class="c"># if predicted character is not the same as source</span>
+            <span class="k">if</span> <span class="n">inst</span> <span class="o">!=</span> <span class="s">&#39;0&#39;</span><span class="p">:</span> 
+                <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;INS&#39;</span><span class="p">):</span>
+                        <span class="c"># outcomes can contain diacritics, decode them</span>
+                        <span class="n">parse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span> 
+                    <span class="k">elif</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;DEL&#39;</span><span class="p">):</span>
+                        <span class="n">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">parse</span>
+</div>
+<div class="viewcode-block" id="MBLEM.lemmatize"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBLEM.lemmatize">[docs]</a>    <span class="k">def</span> <span class="nf">lemmatize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Lemmatize a word::</span>
+
+<span class="sd">            &gt;&gt;&gt; lemmatizer = MBLEM()</span>
+<span class="sd">            &gt;&gt;&gt; lemmatizer.lemmatize(&#39;zochten&#39;)</span>
+<span class="sd">            zoeken</span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            the lemmatized form of the input word.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+        </div>
+<div class="viewcode-block" id="MBLEM.pprint_parse"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBLEM.pprint_parse">[docs]</a>    <span class="k">def</span> <span class="nf">pprint_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="MBPT"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBPT">[docs]</a><span class="k">class</span> <span class="nc">MBPT</span><span class="p">(</span><span class="n">MBClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Memory-Based Part-of-speech Tagger. MBPT is a Memory-Based Classifier</span>
+<span class="sd">    that attempts to predict the part-of-speech category of words.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">HOST</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">MBPT_CONFIG</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">MBClassifier</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">align</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">53</span><span class="p">))</span>
+
+<div class="viewcode-block" id="MBPT.classify"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBPT.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the part-of-speech category of a word::</span>
+
+<span class="sd">            &gt;&gt;&gt; tagger = MBPT()</span>
+<span class="sd">            &gt;&gt;&gt; tagger.classify(&#39;stier&#39;)</span>
+<span class="sd">            NOU</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            the part-of-speech category of a word.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classify</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MBPT.pprint"><a class="viewcode-back" href="../../../mbmp.classifiers.html#mbmp.classifiers.classifier.MBPT.pprint">[docs]</a>    <span class="k">def</span> <span class="nf">pprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a pretty print of the word and its part-of-speech category::</span>
+
+<span class="sd">            &gt;&gt;&gt; tagger = MBPT()</span>
+<span class="sd">            &gt;&gt;&gt; tagger.pprint(&#39;stier&#39;)</span>
+<span class="sd">            stier   NOU</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - word (str): a string representing a word.</span>
+<span class="sd">            - sep (str): the separator used to separate the word from the</span>
+<span class="sd">            - part-of-speech category.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            the word and its part-of-speech category as a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../classifiers.html" >mbmp.classifiers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

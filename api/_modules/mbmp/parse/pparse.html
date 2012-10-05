@@ -1,0 +1,481 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.parse.pparse &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../../index.html" />
+    <link rel="up" title="mbmp.parse" href="../parse.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../parse.html" accesskey="U">mbmp.parse</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.parse.pparse</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="kn">import</span> <span class="nn">cPickle</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+
+<span class="kn">from</span> <span class="nn">nltk.grammar</span> <span class="kn">import</span> <span class="n">induce_pcfg</span>
+<span class="kn">from</span> <span class="nn">nltk.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">ProbabilisticTree</span>
+
+<span class="kn">from</span> <span class="nn">mbmp.config</span> <span class="kn">import</span> <span class="n">PCFG</span>
+
+
+<span class="k">def</span> <span class="nf">prod_to_chomsky_normal_form</span><span class="p">(</span><span class="n">production</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transform a production into Chomsky Normal Form.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - production (:class:`nltk.Production`): a grammar rule</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        a list of CNF&#39;ified productions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">production</span><span class="o">.</span><span class="n">rhs</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="p">[</span><span class="n">production</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">(),</span> <span class="p">[]]</span>
+        <span class="n">cur_node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">num_children</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">production</span><span class="o">.</span><span class="n">rhs</span><span class="p">())</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">production</span><span class="o">.</span><span class="n">rhs</span><span class="p">()]</span>
+        <span class="n">child_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">production</span><span class="o">.</span><span class="n">rhs</span><span class="p">()]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_children</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">new_head</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">|&lt;</span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">production</span><span class="o">.</span><span class="n">lhs</span><span class="p">(),</span> <span class="s">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">child_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">num_children</span><span class="p">]))</span>
+            <span class="n">new_node</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">new_head</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">cur_node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">children</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">new_node</span><span class="p">]</span>
+            <span class="n">cur_node</span> <span class="o">=</span> <span class="n">new_node</span>
+        <span class="n">cur_node</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">child</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Tree</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">productions</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">production</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Declare a initialization function depending on the type of grammar</span>
+<span class="sd">    given as input (a regular PCFG or the grammar from MBMA).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - grammar: a probabilistic grammar</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        an initialization function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">ParserTable</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">end</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">ProbabilisticTree</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">rhs</span><span class="p">(),</span> <span class="n">prob</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">prob</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">productions</span><span class="p">(</span><span class="n">rhs</span><span class="o">=</span><span class="n">tokens</span><span class="p">[</span><span class="n">end</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">return</span> <span class="n">table</span>
+    <span class="k">return</span> <span class="n">initialize</span>
+
+<span class="k">def</span> <span class="nf">linking</span><span class="p">(</span><span class="n">prod</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return true if the Left Hand Side of Production contains a CNF rewrite.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - prod (:class:`nltk.Production`): a production rule</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;|&#39;</span> <span class="ow">in</span>  <span class="n">prod</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">ParserTable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The matrix used by :class:mbmp.parse.CKYParser`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table</span> <span class="o">=</span> <span class="p">[[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+                           <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                       
+    <span class="k">def</span> <span class="nf">leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns: the leaves in the table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span>
+        
+    <span class="k">def</span> <span class="nf">num_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns: the number of leaves in the table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span>
+
+    <span class="k">def</span> <span class="nf">top_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns: True if where at the root node of the tree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">start</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">end</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span>
+        
+    <span class="k">def</span> <span class="nf">parses</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns: all full parses in the table (located at position [0,num_leaves]).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_leaves</span><span class="p">]</span>
+        
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;ParserTable: </span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="CKYParser"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser">[docs]</a><span class="k">class</span> <span class="nc">CKYParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A CKY Parser for deriving trees that represent possible structures for a</span>
+<span class="sd">    sequence of morphemes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beam_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a CKYParser.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - grammar (:class:`nltk.WeightedGrammar`): the PCFG used by the parser</span>
+<span class="sd">            - beam_size (int): the strictness for pruning</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">grammar</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">grammar</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">PCFG</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam_size</span> <span class="o">=</span> <span class="n">beam_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top_probs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_productions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_productions</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span> <span class="o">=</span> <span class="n">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_productions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Index the Right Hand Rules of the productions in grammar. Raise an</span>
+<span class="sd">        error if a production is not in Chomsky Normal Form.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - grammar (:class:`nltk.WeightedGrammar`): the grammar to be extracted</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict -- a dictionary with the rhs of productions as keys and the</span>
+<span class="sd">                    complete productons as values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">productions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">production</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">productions</span><span class="p">():</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">production</span><span class="o">.</span><span class="n">rhs</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">productions</span><span class="p">[</span><span class="n">rhs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">(),</span> <span class="n">rhs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">()]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">production</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">production</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;W&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">top_probs</span><span class="p">[</span><span class="n">rhs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">()]</span> <span class="o">=</span> <span class="n">production</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span>
+                <span class="c"># all productions except the top nodes should be in CNF,</span>
+                <span class="c"># hence no unary productions are allowed.</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rhs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">basestring</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Production </span><span class="si">%s</span><span class="s"> not in CNF&#39;</span> <span class="o">%</span> <span class="n">production</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">productions</span>
+
+<div class="viewcode-block" id="CKYParser.parse"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Derive of possible trees from the input.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            - tokens: a list of morphemes</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list -- all complete parses that could be derived.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># initialize the table</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="c"># run the CKY algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="c"># return all complete parses</span>
+        <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">parses</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function of :func:`CKYParser.parse` that implements the actual</span>
+<span class="sd">        parsing algorithm.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - table :class:`ParserTable`: a probabilistic CKY matrix</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list -- all complete parses that could be derived.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">end</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">top_node</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">top_node</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+                <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">start</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">start</span><span class="p">][</span><span class="n">split</span><span class="p">],</span> <span class="n">table</span><span class="p">[</span><span class="n">split</span><span class="p">][</span><span class="n">end</span><span class="p">]):</span>
+                        <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_productions</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+                            <span class="c"># do not add a tree to trees if the top node is</span>
+                            <span class="c"># an indexed node or if it is a rewritten</span>
+                            <span class="c"># production.</span>
+                            <span class="k">if</span> <span class="n">top_node</span> <span class="ow">and</span> <span class="n">linking</span><span class="p">(</span><span class="n">prod</span><span class="p">):</span>
+                                <span class="k">continue</span>
+                            <span class="n">prob</span> <span class="o">=</span> <span class="n">prod</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span><span class="o">*</span><span class="n">l</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span><span class="o">*</span><span class="n">r</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span>
+                            <span class="n">lhs</span> <span class="o">=</span> <span class="n">prod</span><span class="o">.</span><span class="n">lhs</span><span class="p">()</span><span class="o">.</span><span class="n">symbol</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptable</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">trees</span><span class="p">):</span>
+                                <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">ProbabilisticTree</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">r</span><span class="p">],</span> <span class="n">prob</span><span class="o">=</span><span class="n">prob</span><span class="p">))</span>
+                <span class="n">table</span><span class="p">[</span><span class="n">start</span><span class="p">][</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">trees</span>
+
+<div class="viewcode-block" id="CKYParser.acceptable"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser.acceptable">[docs]</a>    <span class="k">def</span> <span class="nf">acceptable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">trees</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if there are no trees yet or when the probability</span>
+<span class="sd">        of the potentional tree is higher than the trees already found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - lhs: the top node of the new tree</span>
+<span class="sd">            - prob (float): the probability of the new tree</span>
+<span class="sd">            - trees: a list of trees</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">trees</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prune</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">trees</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="CKYParser.find_productions"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser.find_productions">[docs]</a>    <span class="k">def</span> <span class="nf">find_productions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find productions that have left and right as the RHS.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - left: the left Nonterminal</span>
+<span class="sd">            - right: the right Nonterminal</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list -- all grammar rules that have left and right as the RHS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_productions</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">left</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">node</span><span class="p">),</span> <span class="p">[])</span>
+</div>
+    <span class="k">def</span> <span class="nf">_prune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">best_prob</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the probability of the new tree falls within the</span>
+<span class="sd">        accepted range of best probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">prob</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_prob</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam_size</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_prob</span> <span class="o">=</span> <span class="n">prob</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="CKYParser.assign_top_probabilitiy"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser.assign_top_probabilitiy">[docs]</a>    <span class="k">def</span> <span class="nf">assign_top_probabilitiy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">set_prob</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_probs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="mf">0.000001</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tree</span>
+</div>
+<div class="viewcode-block" id="CKYParser.nbest_parse"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.CKYParser.nbest_parse">[docs]</a>    <span class="k">def</span> <span class="nf">nbest_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">post_process</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the nbest parses for the given word. Parses with the same</span>
+<span class="sd">        probability will count for one n step.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - tokens (list): the list of morphemes to be parsed.</span>
+<span class="sd">            - n (int): how many parses to be returned.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list -- the nbest parses</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parses</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="k">if</span> <span class="nb">filter</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="n">parses</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assign_top_probabilitiy</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parses</span><span class="p">)</span>
+        <span class="n">parses</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parses</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">prob</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">parses</span> <span class="ow">and</span> <span class="n">parses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="k">for</span> <span class="n">parse</span> <span class="ow">in</span> <span class="n">parses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">parse</span><span class="o">.</span><span class="n">prob</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">):</span>
+                <span class="n">parse</span><span class="o">.</span><span class="n">un_chomsky_normal_form</span><span class="p">()</span>
+                <span class="k">yield</span> <span class="n">parse</span>
+
+</div></div>
+<div class="viewcode-block" id="MbmaCKYParser"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.MbmaCKYParser">[docs]</a><span class="k">class</span> <span class="nc">MbmaCKYParser</span><span class="p">(</span><span class="n">CKYParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This parser implements a :class:`CKYParser` that uses the grammar rules from</span>
+<span class="sd">    :class:`mbmp.MBMA` and -- if needed -- a Probabilistic Context Free Grammar</span>
+<span class="sd">    to parse a word.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">beam_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+        <span class="n">CKYParser</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">beam_size</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MbmaCKYParser.set_grammar"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.MbmaCKYParser.set_grammar">[docs]</a>    <span class="k">def</span> <span class="nf">set_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">productions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the grammar rules from MBMA to the parser. Transforms all rules</span>
+<span class="sd">        to Chomsky Normal Form, induces a Weighted Context Free Grammar on</span>
+<span class="sd">        the basis of these rules and indexes the Right Hand Rules of the</span>
+<span class="sd">        productions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - productions (list): a list of :class:`nltk.Production` instances</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cnf_prods</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">productions</span><span class="p">:</span>
+            <span class="c"># transform each production of MBMA into CNF</span>
+            <span class="n">cnf_prods</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prod_to_chomsky_normal_form</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_grammar</span> <span class="o">=</span> <span class="n">induce_pcfg</span><span class="p">(</span><span class="s">&#39;S&#39;</span><span class="p">,</span> <span class="n">cnf_prods</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_productions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_productions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_grammar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span> <span class="o">=</span> <span class="n">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_grammar</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MbmaCKYParser.find_productions"><a class="viewcode-back" href="../../../mbmp.parse.html#mbmp.parse.pparse.MbmaCKYParser.find_productions">[docs]</a>    <span class="k">def</span> <span class="nf">find_productions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find productions that have left and right as the RHS. First try to</span>
+<span class="sd">        find productions in the valency rules returned by MBMA. If that</span>
+<span class="sd">        fails, try to find the productions in the PCFG.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - left: the left Nonterminal</span>
+<span class="sd">            - right: the right Nonterminal</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list -- all grammar rules that have left and right as the RHS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_productions</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">left</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">node</span><span class="p">),</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prods</span><span class="p">:</span>
+            <span class="n">prods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_productions</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">left</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">node</span><span class="p">),</span> <span class="p">[])</span>
+        <span class="k">return</span> <span class="n">prods</span>
+
+
+<span class="c"># class DOParser(CKYParser):</span>
+<span class="c">#     def __init__(self, grammar = None, beam_size = 1000):</span>
+<span class="c">#         CKYParser.__init__(self, grammar, beam_size)</span>
+
+<span class="c">#     def acceptable(self, lhs, prob, trees):</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+<span class="c">#         Return True if there are no trees yet or when the probability</span>
+<span class="c">#         of the potentional tree is higher than the trees already found or</span>
+<span class="c">#         when the lhs is an indexed node.</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+<span class="c">#         return CKYParser.acceptable(self, lhs, prob, trees) or &#39;@&#39; in lhs</span>
+
+<span class="c">#     def linking(self, prod):</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+<span class="c">#         Return true if the Left Hand Side of Production contains a CNF rewrite.</span>
+<span class="c">#         &quot;&quot;&quot;</span>
+<span class="c">#         lhs = prod.lhs().symbol()</span>
+<span class="c">#         return &#39;|&#39; in lhs or (&#39;@&#39; in lhs and self._grammar.productions(rhs=prod.lhs()))</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">demo</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A demo showing some basic functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">mbmp.parse.util</span> <span class="kn">import</span> <span class="n">make_grammar</span>
+    <span class="kn">from</span> <span class="nn">mbmp.datatypes</span> <span class="kn">import</span> <span class="n">Morpheme</span>
+    <span class="n">parse</span> <span class="o">=</span> <span class="p">[</span><span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;V|*V&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;ver&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;ver&#39;</span><span class="p">),</span>
+             <span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;koop&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;koop&#39;</span><span class="p">),</span>
+             <span class="n">Morpheme</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="s">&#39;A|V*&#39;</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;baar&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;baar&#39;</span><span class="p">)]</span>
+    <span class="k">print</span> <span class="s">&#39;Parse produced by MBMA:&#39;</span>
+    <span class="k">print</span> <span class="p">[</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">parse</span><span class="p">]</span>
+    <span class="k">print</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">PCFG</span><span class="p">))</span>
+    <span class="k">print</span> <span class="s">&#39;Parsing word &quot;ver koop baar&quot; with default CKY Parser&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">CKYParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">nbest_parse</span><span class="p">(</span><span class="s">&#39;ver koop baar&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+        <span class="k">print</span> <span class="n">tree</span>
+    <span class="k">print</span>
+    <span class="k">print</span> <span class="s">&#39;Parsing word &quot;ver koop baar&quot; with Mbma CKY Parser&#39;</span>
+    <span class="k">print</span> <span class="s">&#39;Compiling grammar rules from parse...&#39;</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">make_grammar</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">prod</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">prod</span>
+    <span class="k">print</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">MbmaCKYParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">set_grammar</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">nbest_parse</span><span class="p">(</span><span class="s">&#39;ver koop baar&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">tree</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;CKYParser&#39;</span><span class="p">,</span> <span class="s">&#39;MbmaCKYParser&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">demo</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../parse.html" >mbmp.parse</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

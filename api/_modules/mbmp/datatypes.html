@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.datatypes &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.datatypes</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+
+<div class="viewcode-block" id="Morpheme"><a class="viewcode-back" href="../../mbmp.html#mbmp.datatypes.Morpheme">[docs]</a><span class="k">class</span> <span class="nc">Morpheme</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A data class representing a morpheme. Each morpheme specifies</span>
+<span class="sd">    a token form, a lemma form and its part-of-speech tag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lemma</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            - token (str): the token representation of a morpheme</span>
+<span class="sd">            - pos (str): the part-of-speech category of a morpheme</span>
+<span class="sd">            - lemma (str): the lemma representation of a morpheme</span>
+
+<span class="sd">        If lemma is not given (e.g. because it is equal to token), lemma</span>
+<span class="sd">        if automatically set to token::</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; m = Morpheme(&#39;clapp&#39;, &#39;V&#39;, &#39;clap&#39;)</span>
+<span class="sd">            Morpheme(token=&#39;clapp&#39;, lemma=&#39;clap&#39;, pos=&#39;V&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; m Morpheme(&#39;clapp&#39;, &#39;V&#39;)</span>
+<span class="sd">            Morpheme(token=&#39;clapp&#39;, lemma=&#39;clapp&#39;, pos=&#39;V&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span> <span class="o">=</span> <span class="n">lemma</span>
+        <span class="c"># if lemma is not specified, default to token</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Morpheme(token=</span><span class="si">%s</span><span class="s">, lemma=</span><span class="si">%s</span><span class="s">, pos=</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pprint</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Morpheme</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">token</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">lemma</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span> <span class="o">==</span> <span class="n">other</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Morpheme.pprint"><a class="viewcode-back" href="../../mbmp.html#mbmp.datatypes.Morpheme.pprint">[docs]</a>    <span class="k">def</span> <span class="nf">pprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mrepr</span><span class="o">=</span><span class="s">&#39;tokens-and-lemmas&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a string representation of the morpheme.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            - mrepr: Choose a morpheme representation:</span>
+<span class="sd">                - tokens = token representation</span>
+<span class="sd">                - lemmas = lemma representation</span>
+<span class="sd">                - tokens-and-lemmas = token and lemma representation</span>
+<span class="sd">                    separated by a &#39;=&#39; character (zett=zet)</span>
+<span class="sd">                    </span>
+<span class="sd">        Example usage::</span>
+<span class="sd">            &gt;&gt;&gt; m = Morpheme(&#39;clapp&#39;, &#39;V&#39;, &#39;clap&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; m.pprint(mrepr=&#39;tokens&#39;)</span>
+<span class="sd">            clapp</span>
+<span class="sd">            &gt;&gt;&gt; m.pprint(mrepr=&#39;lemmas&#39;)</span>
+<span class="sd">            clap</span>
+<span class="sd">            &gt;&gt;&gt; m.pprint(mrepr=&#39;tokens-and-lemmas&#39;)</span>
+<span class="sd">            clapp=clap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mrepr</span> <span class="o">==</span> <span class="s">&#39;tokens-and-lemmas&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">:</span>
+                <span class="n">leaf</span> <span class="o">=</span> <span class="s">&#39;=&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">leaf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+        <span class="k">elif</span> <span class="n">mrepr</span> <span class="o">==</span> <span class="s">&#39;lemmas&#39;</span><span class="p">:</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lemma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+        <span class="k">return</span> <span class="n">leaf</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

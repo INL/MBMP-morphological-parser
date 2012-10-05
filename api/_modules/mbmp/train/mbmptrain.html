@@ -1,0 +1,468 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.train.mbmptrain &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../../index.html" />
+    <link rel="up" title="mbmp.train" href="../train.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../train.html" accesskey="U">mbmp.train</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.train.mbmptrain</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">Tree</span>
+
+<span class="kn">from</span> <span class="nn">mbmp.train.util</span> <span class="kn">import</span> <span class="n">unicode_csv_reader</span>
+<span class="kn">from</span> <span class="nn">mbmp.train.transform</span> <span class="kn">import</span> <span class="n">rewrite_string</span><span class="p">,</span> <span class="n">edit_distance</span>
+
+
+<div class="viewcode-block" id="timbl_instancebase"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.timbl_instancebase">[docs]</a><span class="k">def</span> <span class="nf">timbl_instancebase</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a timbl instancebase from a trainingfile. Default output is </span>
+<span class="sd">    original file plus instancebase as extension.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - filepath (str): the path to the trainingfile</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">timbl</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&#39;timbl&#39;</span><span class="p">,</span> <span class="s">&#39;-f&#39;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="s">&#39;-I&#39;</span><span class="p">,</span> <span class="n">filepath</span><span class="o">+</span><span class="s">&#39;.instancebase&#39;</span><span class="p">],</span>
+        <span class="n">stderr</span> <span class="o">=</span> <span class="n">out</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="make_instances"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.make_instances">[docs]</a><span class="k">def</span> <span class="nf">make_instances</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a item into a windowed representation as described in</span>
+<span class="sd">    Van den Bosch and Daelemans (1999):</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - item (str): a string representing a word</span>
+<span class="sd">        - tags (list): a list of tags per character of ITEM</span>
+<span class="sd">        - right (int): context on the right side of a focus letter.</span>
+<span class="sd">        - left (int): context on the left side of a focus letter.</span>
+<span class="sd">        - sep (str): the separator used to separate variables in the window.</span>
+<span class="sd">    Yields:</span>
+<span class="sd">        a window per character of item</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)):</span>
+        <span class="n">inst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">right</span> <span class="o">+</span> <span class="n">left</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">left</span> <span class="ow">or</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">+</span> <span class="n">left</span><span class="p">:</span>
+                <span class="n">inst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># if the item contains elements that are the same</span>
+                <span class="c"># as &#39;sep&#39;, choose another symbol (&#39;C&#39;)</span>
+                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="n">left</span><span class="p">]</span> <span class="o">==</span> <span class="n">sep</span><span class="p">:</span>
+                    <span class="n">inst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">inst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="n">left</span><span class="p">])</span>
+        <span class="n">inst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tags</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">yield</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inst</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="format_testitem"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.format_testitem">[docs]</a><span class="k">def</span> <span class="nf">format_testitem</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a window with empty outcome slots (&#39;?&#39;) for a test item::</span>
+
+<span class="sd">        &gt;&gt;&gt; for window in format_testitem(&#39;aardigheidje&#39;):</span>
+<span class="sd">        ...     print window</span>
+<span class="sd">        _,_,_,_,_,a,a,r,d,i,g,?</span>
+<span class="sd">        _,_,_,_,a,a,r,d,i,g,h,?</span>
+<span class="sd">        _,_,_,a,a,r,d,i,g,h,e,?</span>
+<span class="sd">        _,_,a,a,r,d,i,g,h,e,i,?</span>
+<span class="sd">        _,a,a,r,d,i,g,h,e,i,d,?</span>
+<span class="sd">        a,a,r,d,i,g,h,e,i,d,j,?</span>
+<span class="sd">        a,r,d,i,g,h,e,i,d,j,e,?</span>
+<span class="sd">        r,d,i,g,h,e,i,d,j,e,_,?</span>
+<span class="sd">        d,i,g,h,e,i,d,j,e,_,_,?</span>
+<span class="sd">        i,g,h,e,i,d,j,e,_,_,_,?</span>
+<span class="sd">        g,h,e,i,d,j,e,_,_,_,_,?</span>
+<span class="sd">        h,e,i,d,j,e,_,_,_,_,_,?</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - item (str): a string representing a word</span>
+<span class="sd">        - sep (str): the separator used to separate variables in the window.</span>
+<span class="sd">    Yields:</span>
+<span class="sd">        a complete window for word in which all outcomes are marked as &#39;?&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">make_instances</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s">&#39;?&#39;</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="n">left</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="make_tagged_instances"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.make_tagged_instances">[docs]</a><span class="k">def</span> <span class="nf">make_tagged_instances</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="s">&#39;@&#39;</span><span class="p">,</span> <span class="n">windowsep</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a window for a word with the given tags::</span>
+
+<span class="sd">        &gt;&gt;&gt; for window in make_tagged_instances(&#39;gezellig@A+heid@N|A*&#39;, get_tags):</span>
+<span class="sd">        ...     print window</span>
+<span class="sd">        _,_,_,_,_,g,e,z,e,l,l,A</span>
+<span class="sd">        _,_,_,_,g,e,z,e,l,l,i,0</span>
+<span class="sd">        _,_,_,g,e,z,e,l,l,i,g,0</span>
+<span class="sd">        _,_,g,e,z,e,l,l,i,g,h,0</span>
+<span class="sd">        _,g,e,z,e,l,l,i,g,h,e,0</span>
+<span class="sd">        g,e,z,e,l,l,i,g,h,e,i,0</span>
+<span class="sd">        e,z,e,l,l,i,g,h,e,i,d,0</span>
+<span class="sd">        z,e,l,l,i,g,h,e,i,d,_,0</span>
+<span class="sd">        e,l,l,i,g,h,e,i,d,_,_,N|A*</span>
+<span class="sd">        l,l,i,g,h,e,i,d,_,_,_,0</span>
+<span class="sd">        l,i,g,h,e,i,d,_,_,_,_,0</span>
+<span class="sd">        i,g,h,e,i,d,_,_,_,_,_,0</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        - inst (str): a string with morphemes separated by SEP holding tags</span>
+<span class="sd">            separated by TAGSEP.</span>
+<span class="sd">        - fn (function): the function used to extract the tags or segments.</span>
+<span class="sd">            Use :func:`get_segments` to create an instance with segmentation</span>
+<span class="sd">            marks. Use :func:`get_tags` to create an instance with Part of</span>
+<span class="sd">            Speech marks.</span>
+<span class="sd">        - size (int): the window size</span>
+<span class="sd">        - sep (str): the separator used to separate the items of inst</span>
+<span class="sd">        - tagsep (str): the separator used to separate tags from</span>
+<span class="sd">        - windowsep (str): the separator used to separate variables in the window.</span>
+<span class="sd">    Yields:</span>
+<span class="sd">        a complete window for word in which all outcomes are marked as &#39;?&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">word</span><span class="p">,</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="n">tagsep</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Window has a different size than tags...&quot;</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;*&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">make_instances</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">windowsep</span><span class="p">)</span>
+</div>
+<span class="k">def</span> <span class="nf">_extract_tags</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to extract classes from an annotated instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">segments</span><span class="p">,</span> <span class="n">word</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+        <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="n">word</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leaf</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">leaf</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+            <span class="n">word</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">word</span><span class="p">),</span> <span class="n">segments</span>
+    
+<div class="viewcode-block" id="get_segments"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.get_segments">[docs]</a><span class="k">def</span> <span class="nf">get_segments</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the original word and the tags per character. An instance</span>
+<span class="sd">    such as ``huis+deur`` is converted into::</span>
+<span class="sd">    </span>
+<span class="sd">        (&#39;huisdeur&#39;, [&#39;0&#39;,&#39;0&#39;,&#39;0&#39;,&#39;0&#39;,&#39;+&#39;,&#39;0&#39;,&#39;0&#39;,&#39;0&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">word</span><span class="p">,</span> <span class="n">segments</span> <span class="o">=</span> <span class="n">_extract_tags</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">segment</span><span class="p">,</span> <span class="n">sep</span><span class="p">)</span> <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)),</span> <span class="n">default</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">word</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">segments</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</div>
+<div class="viewcode-block" id="get_tags"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.get_tags">[docs]</a><span class="k">def</span> <span class="nf">get_tags</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="s">&#39;@&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the original word and the tags per character. An instance</span>
+<span class="sd">    such as ``huis@N+deur@NWB`` is converted into::</span>
+<span class="sd">    </span>
+<span class="sd">        (&#39;huisdeur&#39;, [&#39;N&#39;,&#39;0&#39;,&#39;0&#39;,&#39;0&#39;,&#39;NWB&#39;,&#39;0&#39;,&#39;0&#39;,&#39;0&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_extract_tags</span><span class="p">((</span><span class="n">m</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">tagsep</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)),</span> <span class="n">default</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="get_rewrite_tags"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.get_rewrite_tags">[docs]</a><span class="k">def</span> <span class="nf">get_rewrite_tags</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the original word and the rewite tags to transform the</span>
+<span class="sd">    word into the corresponding lemma per character of word. An instance</span>
+<span class="sd">    such as ``k,l,o,p,p+DEL:p,e,n`` is converted into::</span>
+<span class="sd">    </span>
+<span class="sd">        (&#39;kloppen&#39;, [&#39;0&#39;,&#39;0&#39;,&#39;0&#39;,&#39;0&#39;,&#39;DEL:p&#39;,&#39;0&#39;,&#39;0&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">word</span><span class="p">,</span> <span class="n">tags</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;+&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="k">elif</span> <span class="n">tagsep</span> <span class="ow">in</span> <span class="n">elt</span><span class="p">:</span>
+            <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+        <span class="n">word</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">word</span><span class="p">,</span> <span class="n">tags</span>
+</div>
+<div class="viewcode-block" id="get_tags_and_rewrite_tags"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.get_tags_and_rewrite_tags">[docs]</a><span class="k">def</span> <span class="nf">get_tags_and_rewrite_tags</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="n">tagsep</span><span class="o">=</span><span class="s">&#39;@&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> 
+                              <span class="n">nltk_tree</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the original word and the rewite tags + POS tags per character.</span>
+<span class="sd">    An instance such as ``huiz@N+en@INFL huis@N+en@INFL`` is converted into::</span>
+<span class="sd">    </span>
+<span class="sd">        (&#39;huizen&#39;, [&#39;N&#39;,&#39;0&#39;,&#39;0&#39;,&#39;DEL:z+INS:s&#39;,&#39;INFL&#39;,&#39;0&#39;,&#39;0&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">nltk_tree</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">mbma_repr</span><span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">mbma_repr</span><span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+    <span class="n">sa</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">tagsep</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)]</span>
+    <span class="n">ta</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">tagsep</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sa</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ta</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Unequal number of morphemes in </span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Unequal number of morphemes in </span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="n">st</span><span class="p">),</span> <span class="p">(</span><span class="n">tm</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sa</span><span class="p">,</span> <span class="n">ta</span><span class="p">):</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="n">lemma_formatter</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="n">tm</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">instance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;@</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">st</span>
+        <span class="n">analysis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="lemma_formatter"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.lemma_formatter">[docs]</a><span class="k">def</span> <span class="nf">lemma_formatter</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">rewrite</span> <span class="o">=</span> <span class="n">rewrite_string</span><span class="p">(</span><span class="n">edit_distance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">backtrace</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">string</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rewrite</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rewrite</span>
+</div>
+<div class="viewcode-block" id="mbma_repr"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.mbma_repr">[docs]</a><span class="k">def</span> <span class="nf">mbma_repr</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s">&#39;@&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transform a tree structure into a flat representation used by MBMA::</span>
+
+<span class="sd">        &gt;&gt;&gt; tree = nltk.Tree(&#39;(N (V (PRE ver) (A grijs)) (SUF ing))&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print mbma_repr(tree)</span>
+<span class="sd">        &#39;ver@V|*A+grijs@A+ing@N|V*WB&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_mbma_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">split</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="n">tree</span>
+        <span class="n">subtrees</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="n">newtrees</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">subtree</span> <span class="ow">in</span> <span class="n">subtrees</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subtree</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Tree</span><span class="p">):</span>
+                <span class="n">newtrees</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_mbma_tree</span><span class="p">(</span><span class="n">subtree</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">split</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">subtree</span><span class="o">.</span><span class="n">node</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;PRE&#39;</span><span class="p">,</span> <span class="s">&#39;LE&#39;</span><span class="p">,</span> <span class="s">&#39;SUF&#39;</span><span class="p">):</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">|&#39;</span> <span class="o">%</span> <span class="n">tree</span><span class="o">.</span><span class="n">node</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">subtrees</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">node</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;PRE&#39;</span><span class="p">,</span> <span class="s">&#39;LE&#39;</span><span class="p">,</span> <span class="s">&#39;SUF&#39;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">node</span> <span class="o">==</span> <span class="n">subtree</span><span class="o">.</span><span class="n">node</span><span class="p">:</span>
+                            <span class="n">node</span> <span class="o">+=</span> <span class="s">&#39;*&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">node</span> <span class="o">+=</span> <span class="s">&#39;x&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">node</span> <span class="o">+=</span> <span class="n">t</span><span class="o">.</span><span class="n">node</span>
+                <span class="n">newtrees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">[</span><span class="n">subtree</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newtrees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subtree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Tree</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">newtrees</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">Tree</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%r</span><span class="s"> is not of type Tree&#39;</span> <span class="o">%</span> <span class="n">tree</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">_mbma_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">WB&#39;</span> <span class="o">%</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="delimiter_type"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.delimiter_type">[docs]</a><span class="k">def</span> <span class="nf">delimiter_type</span><span class="p">(</span><span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delimiter</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">t&#39;</span><span class="p">:</span>
+        <span class="n">delimiter</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+    <span class="k">elif</span> <span class="n">delimiter</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">n&#39;</span><span class="p">:</span>
+        <span class="n">delimiter</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+    <span class="k">return</span> <span class="n">delimiter</span>
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../mbmp.train.html#mbmp.train.mbmptrain.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="s">&#39;mbmptrain&#39;</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s">        Training utilities for MBMA.</span>
+<span class="s">        Script to convert morphological analyses into a format appropriate</span>
+<span class="s">        for a letter-by-letter classification task.</span>
+
+<span class="s">        The script supports three kinds of instancebases:</span>
+<span class="s">           1. segmentation</span>
+<span class="s">           2. POS-tagging of morphemes</span>
+<span class="s">           3. lemmatization</span>
+<span class="s">           4. POS-tagging of morphemes + lemmatization</span>
+<span class="s">        For each task the inputfile must consist of one item per line</span>
+<span class="s">        and follow the follwing rules:</span>
+<span class="s">           1. segmentation: each morpheme of a word must be separated by a</span>
+<span class="s">                 separator, e.g. &#39;+&#39;. Example: huisdeur -&gt; huis+deur</span>
+<span class="s">           2. POS-tagging: each morpheme of a word must be separated by a</span>
+<span class="s">                 separator, e.g. &#39;+&#39; and to each morpheme a POS-tag is</span>
+<span class="s">                 attached by another separator, e.g. &#39;@&#39;.</span>
+<span class="s">                 Example: huisdeur -&gt; huis@N+deur@N</span>
+<span class="s">           3. lemmatization: inputfile must consist of word form and lemma</span>
+<span class="s">                 pairs separated by a comma.</span>
+<span class="s">                 Example: mocht,mag</span>
+<span class="s">           4. POS-tagging + lemmatization: inputfile must be of the same type</span>
+<span class="s">                 as lemmatization, and each word (word form and lemma) must</span>
+<span class="s">                 be in the format descripbed under 2 (POS-tagging). (Note</span>
+<span class="s">                 that both word form and lemma must contain an equal number</span>
+<span class="s">                 of morphemes.&quot;&quot;&quot;</span><span class="p">))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;inputfile&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the input file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;output&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">),</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;the path pointing to the output file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;filetype&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;pos&#39;</span><span class="p">,</span> <span class="s">&#39;seg&#39;</span><span class="p">,</span> <span class="s">&#39;lem&#39;</span><span class="p">,</span> <span class="s">&#39;pos_lem&#39;</span><span class="p">],</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Make windows on the basis of pos, lemma or segmentation tags&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;-w&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;windowsize&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Specify the size of the left and right context</span>
+<span class="s">                  from the focus letter.&#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--morphsep&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;morphsep&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;+&#39;</span><span class="p">,</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;The separator used to separate morphemes&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--tagsep&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;tagsep&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;@&#39;</span><span class="p">,</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;The separator used to separate tags from morphemes&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--lemmasep&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;lemmasep&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">delimiter_type</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;The separator used to separate word form and lemma pairs.</span>
+<span class="s">        Normally, this option does not need to be set because Python tries to</span>
+<span class="s">        detect the correct delimiter.&#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--nltk_trees&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;trees&#39;</span><span class="p">,</span> <span class="n">action</span> <span class="o">=</span> <span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Input trees are in NLTK tree format&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--encoding&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;encoding&#39;</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>  <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;utf-8&#39;</span><span class="p">,</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Default encoding of input&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s">&#39;--instancebase&#39;</span><span class="p">,</span> <span class="n">dest</span> <span class="o">=</span> <span class="s">&#39;timbl&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Make a timbl instancebase from the input file&#39;</span><span class="p">)</span>
+    
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">args</span><span class="o">.</span><span class="n">inputfile</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="c"># setup an appropriate formatter function and a file check function    </span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;pos&#39;</span><span class="p">,</span> <span class="s">&#39;seg&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="o">==</span> <span class="s">&#39;pos&#39;</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">get_tags</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="o">==</span> <span class="s">&#39;seg&#39;</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">get_segments</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">trees</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="o">!=</span> <span class="s">&#39;seg&#39;</span>
+            <span class="n">check_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">Tree</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">mbma_repr</span><span class="p">(</span><span class="n">Tree</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">check_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;lem&#39;</span><span class="p">,</span> <span class="s">&#39;pos_lem&#39;</span><span class="p">):</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">get_rewrite_tags</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">lemmasep</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">lemmasep</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">inputfile</span> <span class="o">=</span> <span class="n">unicode_csv_reader</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">lemmasep</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">inputfile</span> <span class="o">=</span> <span class="n">unicode_csv_reader</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">lemmasep</span><span class="p">)</span>
+        <span class="n">check_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filetype</span> <span class="o">==</span> <span class="s">&#39;lem&#39;</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">lemma_formatter</span><span class="p">(</span><span class="o">*</span><span class="n">l</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">get_tags_and_rewrite_tags</span><span class="p">(</span><span class="o">*</span><span class="n">l</span><span class="p">,</span> <span class="n">nltk_tree</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">trees</span><span class="p">)</span>
+            
+    <span class="c"># process the input line by line</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">inputfile</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%r</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_fn</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Wrong input line: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">line</span><span class="p">)</span>
+            <span class="c"># change back to normal one item per line!!</span>
+        <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">make_tagged_instances</span><span class="p">(</span><span class="n">formatter</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">fn</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">windowsize</span><span class="p">,</span>
+                                            <span class="n">tagsep</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tagsep</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">morphsep</span><span class="p">):</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">u&#39;{}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c"># if the option --instancebase was set, try to compile an instancebase</span>
+    <span class="c"># with timbl. (This of course requires TiMBL to be installed and on</span>
+    <span class="c"># your path.)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">timbl</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Creating instancebase...</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">timbl_instancebase</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../train.html" >mbmp.train</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

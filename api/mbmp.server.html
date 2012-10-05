@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>server Package &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="index.html" />
+    <link rel="up" title="mbmp Package" href="mbmp.html" />
+    <link rel="next" title="train Package" href="mbmp.train.html" />
+    <link rel="prev" title="parse Package" href="mbmp.parse.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.train.html" title="train Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.parse.html" title="parse Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" accesskey="U">mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="server-package">
+<h1>server Package<a class="headerlink" href="#server-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">server</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mbmp.server"></span><dl class="class">
+<dt id="mbmp.server.TimblServer">
+<em class="property">class </em><tt class="descclassname">mbmp.server.</tt><tt class="descname">TimblServer</tt><big>(</big><em>host='localhost'</em>, <em>port=8080</em>, <em>features={}</em>, <em>classifier=None</em><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An interface to the TimblServer. The server can be questioned via
+the TimblClient. The host specifies the server address (localhost by
+default) and port specifies the server tcp communicating port. Features
+is a dictionary of flags and options send to the server. This can be
+specified in the config.py file.</p>
+<dl class="method">
+<dt id="mbmp.server.TimblServer.kill">
+<tt class="descname">kill</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill the TimblServer. Return True if the server is killed,
+false otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.TimblServer.owns_server">
+<tt class="descname">owns_server</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer.owns_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the timblserver is owned by the current user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.TimblServer.pid">
+<tt class="descname">pid</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer.pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pid of the timblserver associated with this
+instance of the class TimblServer. If no file is found, return None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.TimblServer.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to start the TimblServer at the given host and port. If the
+server is already running, does nothing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.TimblServer.started">
+<tt class="descname">started</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.server.TimblServer.started" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the server is started, False otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.pid_file">
+<tt class="descclassname">mbmp.server.</tt><tt class="descname">pid_file</tt><big>(</big><em>server</em><big>)</big><a class="headerlink" href="#mbmp.server.pid_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path to the file holding the pid for a given instance
+of TimblServer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>str &#8211; the path to the file containing the pid for this server.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.remove_pid_file">
+<tt class="descclassname">mbmp.server.</tt><tt class="descname">remove_pid_file</tt><big>(</big><em>server</em><big>)</big><a class="headerlink" href="#mbmp.server.remove_pid_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the file holding the pid for a given instance of TimblServer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.free_port">
+<tt class="descclassname">mbmp.server.</tt><tt class="descname">free_port</tt><big>(</big><em>server</em><big>)</big><a class="headerlink" href="#mbmp.server.free_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function to check whether a given port is free.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.server_in_use">
+<tt class="descclassname">mbmp.server.</tt><tt class="descname">server_in_use</tt><big>(</big><em>serverinstance</em><big>)</big><a class="headerlink" href="#mbmp.server.server_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if there are any other connections with the timblserver. If so,
+return True, else return False.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.server.server">
+<span id="server-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">server</span></tt> Module<a class="headerlink" href="#module-mbmp.server.server" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.server.server.TimblServer">
+<em class="property">class </em><tt class="descclassname">mbmp.server.server.</tt><tt class="descname">TimblServer</tt><big>(</big><em>host='localhost'</em>, <em>port=8080</em>, <em>features={}</em>, <em>classifier=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An interface to the TimblServer. The server can be questioned via
+the TimblClient. The host specifies the server address (localhost by
+default) and port specifies the server tcp communicating port. Features
+is a dictionary of flags and options send to the server. This can be
+specified in the config.py file.</p>
+<dl class="method">
+<dt id="mbmp.server.server.TimblServer.kill">
+<tt class="descname">kill</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill the TimblServer. Return True if the server is killed,
+false otherwise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.server.TimblServer.owns_server">
+<tt class="descname">owns_server</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer.owns_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer.owns_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the timblserver is owned by the current user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.server.TimblServer.pid">
+<tt class="descname">pid</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer.pid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer.pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pid of the timblserver associated with this
+instance of the class TimblServer. If no file is found, return None.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.server.TimblServer.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to start the TimblServer at the given host and port. If the
+server is already running, does nothing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.server.server.TimblServer.started">
+<tt class="descname">started</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/server/server.html#TimblServer.started"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.server.TimblServer.started" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the server is started, False otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.server.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mbmp.server.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.server.util.free_port">
+<tt class="descclassname">mbmp.server.util.</tt><tt class="descname">free_port</tt><big>(</big><em>server</em><big>)</big><a class="reference internal" href="_modules/mbmp/server/util.html#free_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.util.free_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function to check whether a given port is free.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.util.pid_file">
+<tt class="descclassname">mbmp.server.util.</tt><tt class="descname">pid_file</tt><big>(</big><em>server</em><big>)</big><a class="reference internal" href="_modules/mbmp/server/util.html#pid_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.util.pid_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path to the file holding the pid for a given instance
+of TimblServer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>str &#8211; the path to the file containing the pid for this server.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.util.remove_pid_file">
+<tt class="descclassname">mbmp.server.util.</tt><tt class="descname">remove_pid_file</tt><big>(</big><em>server</em><big>)</big><a class="reference internal" href="_modules/mbmp/server/util.html#remove_pid_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.util.remove_pid_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the file holding the pid for a given instance of TimblServer.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.server.util.server_in_use">
+<tt class="descclassname">mbmp.server.util.</tt><tt class="descname">server_in_use</tt><big>(</big><em>serverinstance</em><big>)</big><a class="reference internal" href="_modules/mbmp/server/util.html#server_in_use"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.server.util.server_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if there are any other connections with the timblserver. If so,
+return True, else return False.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>server: an instance of Timblserver that needs to be started</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>boolean</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">server Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">server</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-mbmp.server.server"><tt class="docutils literal"><span class="pre">server</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.server.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mbmp.parse.html"
+                        title="previous chapter">parse Package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mbmp.train.html"
+                        title="next chapter">train Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mbmp.server.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.train.html" title="train Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.parse.html" title="parse Package"
+             >previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" >mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

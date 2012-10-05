@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mbmp.util &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mbmp.util</h1><div class="highlight"><pre>
+<span class="c">## Python implementation of MBMA (Van den Bosch &amp; Daelemans 1999)</span>
+
+<span class="c">## Copyright (C) 2011 Institute for Dutch Lexicology (INL)</span>
+<span class="c">## Author: Folgert Karsdorp, INL &lt;servicedesk@inl.nl&gt;</span>
+<span class="c">## URL: &lt;http://www.inl.nl/&gt;</span>
+<span class="c">## For licence information, see LICENCE.TXT</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">lxml.etree</span> <span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">tostring</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">print</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;xml-functions cannot be used, please install lxml&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">Tree</span>
+
+<span class="c"># A dictionary with CELEX pos-tags as keys and those of GiGaNT as values</span>
+<span class="n">POS_TABLE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;N&#39;</span><span class="p">:</span> <span class="s">&#39;NOU&#39;</span><span class="p">,</span>
+    <span class="s">&#39;A&#39;</span><span class="p">:</span> <span class="s">&#39;ADJ&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Q&#39;</span><span class="p">:</span> <span class="s">&#39;NUM&#39;</span><span class="p">,</span>
+    <span class="s">&#39;V&#39;</span><span class="p">:</span> <span class="s">&#39;VRB&#39;</span><span class="p">,</span>
+    <span class="s">&#39;D&#39;</span><span class="p">:</span> <span class="s">&#39;DET&#39;</span><span class="p">,</span>
+    <span class="s">&#39;O&#39;</span><span class="p">:</span> <span class="s">&#39;PRO&#39;</span><span class="p">,</span>
+    <span class="s">&#39;B&#39;</span><span class="p">:</span> <span class="s">&#39;ADV&#39;</span><span class="p">,</span>
+    <span class="s">&#39;P&#39;</span><span class="p">:</span> <span class="s">&#39;ADP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Y&#39;</span><span class="p">:</span> <span class="s">&#39;CON&#39;</span><span class="p">,</span>
+    <span class="s">&#39;I&#39;</span><span class="p">:</span> <span class="s">&#39;INT&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Z&#39;</span><span class="p">:</span> <span class="s">&#39;EXP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;E&#39;</span><span class="p">:</span> <span class="s">&#39;NOU&#39;</span><span class="p">,</span>
+    <span class="s">&#39;X&#39;</span><span class="p">:</span> <span class="s">&#39;UNK&#39;</span><span class="p">,</span>
+    <span class="s">&#39;G&#39;</span><span class="p">:</span> <span class="s">&#39;BRM&#39;</span><span class="p">,</span>
+    <span class="s">&#39;C&#39;</span><span class="p">:</span> <span class="s">&#39;CON&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PN&#39;</span><span class="p">:</span> <span class="s">&#39;NOU&#39;</span><span class="p">}</span>
+
+<span class="c"># A dictionary with inflection tags in CELEX with</span>
+<span class="c"># the conversion to GiGaNT pos-tags</span>
+<span class="n">INFLECTION_TABLE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;X&#39;</span><span class="p">:</span> <span class="s">&#39;X&#39;</span><span class="p">,</span>              <span class="c"># none</span>
+    <span class="s">&#39;e&#39;</span><span class="p">:</span> <span class="s">&#39;N&#39;</span><span class="p">,</span>              <span class="c"># singular</span>
+    <span class="s">&#39;m&#39;</span><span class="p">:</span> <span class="s">&#39;N&#39;</span><span class="p">,</span>              <span class="c"># plural</span>
+    <span class="s">&#39;C&#39;</span><span class="p">:</span> <span class="s">&#39;A&#39;</span><span class="p">,</span>              <span class="c"># comparative</span>
+    <span class="s">&#39;i&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># infinitive</span>
+    <span class="s">&#39;p&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># participle</span>
+    <span class="s">&#39;t&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># present tense</span>
+    <span class="s">&#39;v&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># past tense</span>
+    <span class="s">&#39;S&#39;</span><span class="p">:</span> <span class="s">&#39;A&#39;</span><span class="p">,</span>              <span class="c"># superlative</span>
+    <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="s">&#39;N&#39;</span><span class="p">,</span>              <span class="c"># diminutive</span>
+    <span class="s">&#39;E&#39;</span><span class="p">:</span> <span class="s">&#39;A&#39;</span><span class="p">,</span>              <span class="c"># suffix-e </span>
+    <span class="s">&#39;2&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># 2nd person</span>
+    <span class="s">&#39;3&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">,</span>              <span class="c"># third person</span>
+    <span class="s">&#39;G&#39;</span><span class="p">:</span> <span class="s">&#39;N&#39;</span><span class="p">,</span>              <span class="c"># genetive</span>
+    <span class="s">&#39;D&#39;</span><span class="p">:</span> <span class="s">&#39;N&#39;</span><span class="p">,</span>              <span class="c"># dative</span>
+    <span class="s">&#39;P&#39;</span><span class="p">:</span> <span class="s">&#39;A&#39;</span><span class="p">,</span>              <span class="c"># positive</span>
+    <span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="s">&#39;V&#39;</span><span class="p">}</span>              <span class="c"># subjunctive</span>
+
+
+
+      
+<span class="n">LEAF_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(\w+)\=(\w+)&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="tree_to_xml"><a class="viewcode-back" href="../../mbmp.html#mbmp.util.tree_to_xml">[docs]</a><span class="k">def</span> <span class="nf">tree_to_xml</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a NLTK Tree object into xml tree using lxml.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">xml_str</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s">&#39;morpheme&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">leaf</span> <span class="o">=</span> <span class="n">LEAF_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">tree</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">leaf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">token</span><span class="p">,</span> <span class="n">lemma</span> <span class="o">=</span> <span class="n">leaf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">lemma</span> <span class="o">=</span> <span class="n">tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xml_str</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;lemma&#39;</span><span class="p">,</span> <span class="n">lemma</span><span class="p">)</span>
+        <span class="n">xml_str</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">token</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xml_str</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s">&#39;segment&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+            <span class="n">xml_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree_to_xml</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">xml_str</span>
+</div>
+<div class="viewcode-block" id="xml"><a class="viewcode-back" href="../../mbmp.html#mbmp.util.xml">[docs]</a><span class="k">def</span> <span class="nf">xml</span><span class="p">(</span><span class="n">treelist</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">xml_decl</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a list of Trees into an xml structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">treelist</span><span class="p">,</span> <span class="n">Tree</span><span class="p">):</span>
+        <span class="n">treelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">treelist</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">treelist</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Input must be a iterator of trees.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="n">treelist</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">treelist</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s">&#39;lexicon&#39;</span><span class="p">)</span>
+    <span class="c"># input must be a list of id,tree pairs</span>
+    <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">treelist</span><span class="p">:</span>
+        <span class="n">word</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s">&#39;word&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+        <span class="n">word</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree_to_xml</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tostring</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="n">pp</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+                    <span class="n">xml_declaration</span><span class="o">=</span><span class="n">xml_decl</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,924 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>classifiers Package &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="index.html" />
+    <link rel="up" title="mbmp Package" href="mbmp.html" />
+    <link rel="next" title="parse Package" href="mbmp.parse.html" />
+    <link rel="prev" title="mbmp Package" href="mbmp.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.parse.html" title="parse Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.html" title="mbmp Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" accesskey="U">mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="classifiers-package">
+<h1>classifiers Package<a class="headerlink" href="#classifiers-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">classifiers</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mbmp.classifiers"></span><dl class="class">
+<dt id="mbmp.classifiers.MBClassifier">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBClassifier</tt><big>(</big><em>host</em>, <em>port</em>, <em>settings</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract Class representing a Memory-Based Classifier. The classifier
+sets up a <a class="reference internal" href="mbmp.server.html#mbmp.server.TimblServer" title="mbmp.server.TimblServer"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.server.TimblServer</span></tt></a> instance and connects to this
+server via a <a class="reference internal" href="mbmp.html#mbmp.client.TimblClient" title="mbmp.client.TimblClient"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.client.TimblClient</span></tt></a>.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBClassifier.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBClassifier.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of outcome classes for each element of WORD.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>List of predicted outcomes per letter of word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBClassifier.kill">
+<tt class="descname">kill</tt><big>(</big><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBClassifier.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the connection between the client and the server and
+kill the server if not in use by another process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBClassifier.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBClassifier.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classification.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the parse returned by <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBClassifier.classify()</span></tt></li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBClassifier.trees">
+<tt class="descname">trees</tt><big>(</big><em>parse</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBClassifier.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tree-structure of the classification using the NLTK-Tree
+Class.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the parse returned by <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBClassifier.classify()</span></tt></li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a generator with all tree structures obtained.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.MBMA">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBMA</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/celex-morphology-lemmatization.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>parser=&lt;class 'mbmp.parse.pparse.MbmaCKYParser'&gt;</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Analyzer. MBMA is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+splits the word into its containing morphemes and assigns a Part of
+Speech tag to them. On the basis of the Part of Speech tags, MBMA uses a
+special kind of <a class="reference internal" href="mbmp.parse.html#mbmp.parse.CKYParser" title="mbmp.parse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.CKYParser</span></tt></a>
+(<a class="reference internal" href="mbmp.parse.html#mbmp.parse.MbmaCKYParser" title="mbmp.parse.MbmaCKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.MbmaCKYParser</span></tt></a>) to construct hierarchical
+morphological analyses.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBMA.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMA.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify its corresponding part-of-speech
+tag.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">classifier</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;schoenlepel&#39;</span><span class="p">)</span>
+<span class="go">[Morpheme(token=&#39;schoen&#39;, lemma=&#39;schoen&#39;, pos=&#39;N&#39;),</span>
+<span class="go"> Morpheme(token=&#39;lepel&#39;, lemma=&#39;lepel&#39;, pos=&#39;N&#39;)]</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of (tag, leaf) pairs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMA.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMA.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classification.</p>
+<p>Each (Tag, Leaf) pair is
+printed as (Tag Leaf), i.e. the output for a word such as
+&#8216;aandeelhoudersvergadering&#8217; could be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">classifier</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">(ADP aan) (NOU deel) (VRB houd) (SUF er)</span>
+<span class="go">(LE s)</span>
+<span class="go">(VRB vergader) (SUF ing)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a given word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMA.trees">
+<tt class="descname">trees</tt><big>(</big><em>parse</em>, <em>nbest=1</em>, <em>post_process=False</em>, <em>filter=None</em>, <em>mrepr='tokens'</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMA.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a genartor of pretty printed Tree structures of the
+classification.</p>
+<p>The output for a word such as <cite>aandeelhoudersvergadering</cite> is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">trees</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="n">tree</span>
+<span class="go">(NOU</span>
+<span class="go">   (NOU (NOU (ADP aan) (NOU deel)) (VRB houd) (SUF er))</span>
+<span class="go">   (LE s)</span>
+<span class="go">   (NOU (VRB vergader) (SUF ing)))</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first simple">
+<li>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a given word.</li>
+<li>nbest (int): specify how many parses should be returned</li>
+<li>post_process (bool): perform some cleaning operation after parsing</li>
+<li>filter (function): a function used to filter certain trees</li>
+</ul>
+<p class="last">(function must return True or False)
+- mrepr (str): specify how the leaves should be represented in the
+Tree: options are: token forms (&#8216;tokens&#8217;), lemma forms
+(&#8216;lemmas&#8217;) and tokens and lemmas (&#8216;tokens-and-lemmas&#8217;)</p>
+</dd>
+<dt>Yields:</dt>
+<dd>the nbest parses</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.MBLEM">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBLEM</tt><big>(</big><em>host='localhost'</em>, <em>port=50204</em>, <em>settings={'i': '/data/mblem.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBLEM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Lemmatizer. MBLEM is a Memory-Based Classifier
+that attempts to lemmatize word forms. On the basis of a training file
+with transformation rules to convert a wordform to a lemma, the
+classifier tries to predect on a character basis the correct
+transformation.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBLEM.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBLEM.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, predict whether it can stay (same as in
+LEMMA), must be deleted (not in LEMMA) or whether a character from
+LEMMA must be inserted (not in WORD).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>a list of characters representing the predicted lemma.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBLEM.lemmatize">
+<tt class="descname">lemmatize</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBLEM.lemmatize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lemmatize a word:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lemmatizer</span> <span class="o">=</span> <span class="n">MBLEM</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lemmatizer</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="s">&#39;zochten&#39;</span><span class="p">)</span>
+<span class="go">zoeken</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the lemmatized form of the input word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBLEM.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBLEM.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.MBPT">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBPT</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/wnt-pos-tagging.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Part-of-speech Tagger. MBPT is a Memory-Based Classifier
+that attempts to predict the part-of-speech category of words.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBPT.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBPT.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the part-of-speech category of a word:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span> <span class="o">=</span> <span class="n">MBPT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;stier&#39;</span><span class="p">)</span>
+<span class="go">NOU</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the part-of-speech category of a word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBPT.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>word</em>, <em>sep='t'</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBPT.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the word and its part-of-speech category:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span> <span class="o">=</span> <span class="n">MBPT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="s">&#39;stier&#39;</span><span class="p">)</span>
+<span class="go">stier   NOU</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+<li>sep (str): the separator used to separate the word from the</li>
+<li>part-of-speech category.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the word and its part-of-speech category as a string.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.MBMS">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBMS</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/celex-segmentation.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '2'}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Segmentizer. MBMS is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+splits words into their containing segments. No Part of Speech is
+assigned to the segments.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBMS.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMS.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify whether it is the start of a
+segment or not. Returns a list of letters of WORD in which letters
+starting a new segment are preceded by the separation tag.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMS.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMS.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classified segmentations.
+The segmentation tag is used as the separator of the segments, i.e.
+if the segment tag &#8216;+&#8217; is used, the output for a word such as
+<cite>verlanglijstje</cite> is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parse</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;verlanglijstje&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">classifier</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+<span class="go">ver+lang+lijst+je</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a</dt>
+<dd><p class="first last">given word.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMS.segmentize">
+<tt class="descname">segmentize</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMS.segmentize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.MBMC">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.</tt><tt class="descname">MBMC</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/chunks.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Chunker. MBMC is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+tries to return hierarchical morphological parses on the basis of
+identified chunks.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.MBMC.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMC.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify its corresponding chunk tag.
+Returns a list of lists of leaf,part-of-speech,chunk-tag combinations.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of (tag, leaf) pairs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMC.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>chunks</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMC.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classified chunks.
+A word such as ondankbaar is printed as:</p>
+<div class="highlight-python"><pre>on/PRE/O dank/VRB/B-VRB baar/SUF/I-VRB</pre>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>chunks: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMC.classify()</span></tt> for</dt>
+<dd><p class="first last">a given word</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse separated by &#8216;/&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.MBMC.trees">
+<tt class="descname">trees</tt><big>(</big><em>chunks</em>, <em>top_node='W'</em><big>)</big><a class="headerlink" href="#mbmp.classifiers.MBMC.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all valid chunks as NLTK trees, i.e. a chunk parse such as:</p>
+<div class="highlight-python"><pre>ver/PRE/B-VRB beter/ADJ/I-VRB baar/SUF/O</pre>
+</div>
+<p>is transformed into:</p>
+<div class="highlight-python"><pre>(VRB (PRE ver) (ADJ beter)) (SUF baar)</pre>
+</div>
+<p>This method requires NLTK to be installed (see <a class="reference external" href="http://www.nltk.org">http://www.nltk.org</a>).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>chunks: the return value of <a class="reference internal" href="#mbmp.classifiers.MBMC.classify" title="mbmp.classifiers.MBMC.classify"><tt class="xref py py-func docutils literal"><span class="pre">MBMC.classify()</span></tt></a> for a given word</li>
+<li>top_node (str): the label of the top node.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A hierarchical <tt class="xref py py-class docutils literal"><span class="pre">Tree</span></tt></dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.classifiers.api">
+<span id="api-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">api</span></tt> Module<a class="headerlink" href="#module-mbmp.classifiers.api" title="Permalink to this headline">¶</a></h2>
+<p>API of the different memory-based classifiers implemented
+in <tt class="xref py py-mod docutils literal"><span class="pre">mbmp.classifier</span></tt></p>
+<dl class="class">
+<dt id="mbmp.classifiers.api.MBClassifier">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.api.</tt><tt class="descname">MBClassifier</tt><big>(</big><em>host</em>, <em>port</em>, <em>settings</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/api.html#MBClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.api.MBClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract Class representing a Memory-Based Classifier. The classifier
+sets up a <a class="reference internal" href="mbmp.server.html#mbmp.server.TimblServer" title="mbmp.server.TimblServer"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.server.TimblServer</span></tt></a> instance and connects to this
+server via a <a class="reference internal" href="mbmp.html#mbmp.client.TimblClient" title="mbmp.client.TimblClient"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.client.TimblClient</span></tt></a>.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.api.MBClassifier.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/api.html#MBClassifier.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.api.MBClassifier.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of outcome classes for each element of WORD.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>List of predicted outcomes per letter of word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.api.MBClassifier.kill">
+<tt class="descname">kill</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/api.html#MBClassifier.kill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.api.MBClassifier.kill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the connection between the client and the server and
+kill the server if not in use by another process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.api.MBClassifier.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/api.html#MBClassifier.pprint_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.api.MBClassifier.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classification.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the parse returned by <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBClassifier.classify()</span></tt></li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.api.MBClassifier.trees">
+<tt class="descname">trees</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/api.html#MBClassifier.trees"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.api.MBClassifier.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a tree-structure of the classification using the NLTK-Tree
+Class.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the parse returned by <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBClassifier.classify()</span></tt></li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a generator with all tree structures obtained.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.classifiers.classifier">
+<span id="classifier-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">classifier</span></tt> Module<a class="headerlink" href="#module-mbmp.classifiers.classifier" title="Permalink to this headline">¶</a></h2>
+<p>Implementation of various Memory-based Classifiers, such as
+Memory-based Morphological Analysis and Memory-based Lemmatization.</p>
+<dl class="class">
+<dt id="mbmp.classifiers.classifier.MBLEM">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.classifier.</tt><tt class="descname">MBLEM</tt><big>(</big><em>host='localhost'</em>, <em>port=50204</em>, <em>settings={'i': '/data/mblem.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBLEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBLEM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Lemmatizer. MBLEM is a Memory-Based Classifier
+that attempts to lemmatize word forms. On the basis of a training file
+with transformation rules to convert a wordform to a lemma, the
+classifier tries to predect on a character basis the correct
+transformation.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBLEM.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBLEM.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBLEM.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, predict whether it can stay (same as in
+LEMMA), must be deleted (not in LEMMA) or whether a character from
+LEMMA must be inserted (not in WORD).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>a list of characters representing the predicted lemma.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBLEM.lemmatize">
+<tt class="descname">lemmatize</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBLEM.lemmatize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBLEM.lemmatize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lemmatize a word:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lemmatizer</span> <span class="o">=</span> <span class="n">MBLEM</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lemmatizer</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="s">&#39;zochten&#39;</span><span class="p">)</span>
+<span class="go">zoeken</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args: </dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the lemmatized form of the input word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBLEM.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>results</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBLEM.pprint_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBLEM.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.classifier.MBMA">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.classifier.</tt><tt class="descname">MBMA</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/celex-morphology-lemmatization.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>parser=&lt;class 'mbmp.parse.pparse.MbmaCKYParser'&gt;</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Analyzer. MBMA is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+splits the word into its containing morphemes and assigns a Part of
+Speech tag to them. On the basis of the Part of Speech tags, MBMA uses a
+special kind of <a class="reference internal" href="mbmp.parse.html#mbmp.parse.CKYParser" title="mbmp.parse.CKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.CKYParser</span></tt></a>
+(<a class="reference internal" href="mbmp.parse.html#mbmp.parse.MbmaCKYParser" title="mbmp.parse.MbmaCKYParser"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.parse.MbmaCKYParser</span></tt></a>) to construct hierarchical
+morphological analyses.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMA.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMA.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMA.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify its corresponding part-of-speech
+tag.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">classifier</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;schoenlepel&#39;</span><span class="p">)</span>
+<span class="go">[Morpheme(token=&#39;schoen&#39;, lemma=&#39;schoen&#39;, pos=&#39;N&#39;),</span>
+<span class="go"> Morpheme(token=&#39;lepel&#39;, lemma=&#39;lepel&#39;, pos=&#39;N&#39;)]</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of (tag, leaf) pairs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMA.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMA.pprint_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMA.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classification.</p>
+<p>Each (Tag, Leaf) pair is
+printed as (Tag Leaf), i.e. the output for a word such as
+&#8216;aandeelhoudersvergadering&#8217; could be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">classifier</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="go">(ADP aan) (NOU deel) (VRB houd) (SUF er)</span>
+<span class="go">(LE s)</span>
+<span class="go">(VRB vergader) (SUF ing)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a given word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMA.trees">
+<tt class="descname">trees</tt><big>(</big><em>parse</em>, <em>nbest=1</em>, <em>post_process=False</em>, <em>filter=None</em>, <em>mrepr='tokens'</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMA.trees"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMA.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a genartor of pretty printed Tree structures of the
+classification.</p>
+<p>The output for a word such as <cite>aandeelhoudersvergadering</cite> is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">trees</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">trees</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="n">tree</span>
+<span class="go">(NOU</span>
+<span class="go">   (NOU (NOU (ADP aan) (NOU deel)) (VRB houd) (SUF er))</span>
+<span class="go">   (LE s)</span>
+<span class="go">   (NOU (VRB vergader) (SUF ing)))</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first simple">
+<li>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a given word.</li>
+<li>nbest (int): specify how many parses should be returned</li>
+<li>post_process (bool): perform some cleaning operation after parsing</li>
+<li>filter (function): a function used to filter certain trees</li>
+</ul>
+<p class="last">(function must return True or False)
+- mrepr (str): specify how the leaves should be represented in the
+Tree: options are: token forms (&#8216;tokens&#8217;), lemma forms
+(&#8216;lemmas&#8217;) and tokens and lemmas (&#8216;tokens-and-lemmas&#8217;)</p>
+</dd>
+<dt>Yields:</dt>
+<dd>the nbest parses</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.classifier.MBMC">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.classifier.</tt><tt class="descname">MBMC</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/chunks.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Chunker. MBMC is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+tries to return hierarchical morphological parses on the basis of
+identified chunks.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMC.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMC.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMC.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify its corresponding chunk tag.
+Returns a list of lists of leaf,part-of-speech,chunk-tag combinations.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A list of (tag, leaf) pairs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMC.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>chunks</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMC.pprint_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMC.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classified chunks.
+A word such as ondankbaar is printed as:</p>
+<div class="highlight-python"><pre>on/PRE/O dank/VRB/B-VRB baar/SUF/I-VRB</pre>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>chunks: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMC.classify()</span></tt> for</dt>
+<dd><p class="first last">a given word</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse separated by &#8216;/&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMC.trees">
+<tt class="descname">trees</tt><big>(</big><em>chunks</em>, <em>top_node='W'</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMC.trees"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMC.trees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all valid chunks as NLTK trees, i.e. a chunk parse such as:</p>
+<div class="highlight-python"><pre>ver/PRE/B-VRB beter/ADJ/I-VRB baar/SUF/O</pre>
+</div>
+<p>is transformed into:</p>
+<div class="highlight-python"><pre>(VRB (PRE ver) (ADJ beter)) (SUF baar)</pre>
+</div>
+<p>This method requires NLTK to be installed (see <a class="reference external" href="http://www.nltk.org">http://www.nltk.org</a>).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>chunks: the return value of <a class="reference internal" href="#mbmp.classifiers.classifier.MBMC.classify" title="mbmp.classifiers.classifier.MBMC.classify"><tt class="xref py py-func docutils literal"><span class="pre">MBMC.classify()</span></tt></a> for a given word</li>
+<li>top_node (str): the label of the top node.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A hierarchical <tt class="xref py py-class docutils literal"><span class="pre">Tree</span></tt></dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.classifier.MBMS">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.classifier.</tt><tt class="descname">MBMS</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/celex-segmentation.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '2'}</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Morphological Segmentizer. MBMS is a Memory-Based Classifier
+that attempts to analyze words into their component parts. The classifier
+splits words into their containing segments. No Part of Speech is
+assigned to the segments.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMS.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMS.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMS.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each letter of WORD, classify whether it is the start of a
+segment or not. Returns a list of letters of WORD in which letters
+starting a new segment are preceded by the separation tag.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMS.pprint_parse">
+<tt class="descname">pprint_parse</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMS.pprint_parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMS.pprint_parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the classified segmentations.
+The segmentation tag is used as the separator of the segments, i.e.
+if the segment tag &#8216;+&#8217; is used, the output for a word such as
+<cite>verlanglijstje</cite> is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parse</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;verlanglijstje&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">classifier</span><span class="o">.</span><span class="n">pprint_parse</span><span class="p">(</span><span class="n">parse</span><span class="p">)</span>
+<span class="go">ver+lang+lijst+je</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>parse: the return value of <tt class="xref py py-func docutils literal"><span class="pre">mbmp.MBMA.classify()</span></tt> for a</dt>
+<dd><p class="first last">given word.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>A string representation of parse.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBMS.segmentize">
+<tt class="descname">segmentize</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBMS.segmentize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBMS.segmentize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.classifiers.classifier.MBPT">
+<em class="property">class </em><tt class="descclassname">mbmp.classifiers.classifier.</tt><tt class="descname">MBPT</tt><big>(</big><em>host='localhost'</em>, <em>port=50202</em>, <em>settings={'i': '/data/wnt-pos-tagging.instancebase'</em>, <em>'a': '0'</em>, <em>'k': '1'</em>, <em>'C': '10'</em>, <em>'w': '1'}</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBPT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mbmp.classifiers.api.MBClassifier" title="mbmp.classifiers.api.MBClassifier"><tt class="xref py py-class docutils literal"><span class="pre">mbmp.classifiers.api.MBClassifier</span></tt></a></p>
+<p>Memory-Based Part-of-speech Tagger. MBPT is a Memory-Based Classifier
+that attempts to predict the part-of-speech category of words.</p>
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBPT.classify">
+<tt class="descname">classify</tt><big>(</big><em>word</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBPT.classify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBPT.classify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the part-of-speech category of a word:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span> <span class="o">=</span> <span class="n">MBPT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="s">&#39;stier&#39;</span><span class="p">)</span>
+<span class="go">NOU</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the part-of-speech category of a word.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.classifiers.classifier.MBPT.pprint">
+<tt class="descname">pprint</tt><big>(</big><em>word</em>, <em>sep='t'</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/classifier.html#MBPT.pprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.classifier.MBPT.pprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pretty print of the word and its part-of-speech category:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span> <span class="o">=</span> <span class="n">MBPT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tagger</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="s">&#39;stier&#39;</span><span class="p">)</span>
+<span class="go">stier   NOU</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>word (str): a string representing a word.</li>
+<li>sep (str): the separator used to separate the word from the</li>
+<li>part-of-speech category.</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd>the word and its part-of-speech category as a string.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.classifiers.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mbmp.classifiers.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.classifiers.util.align">
+<tt class="descclassname">mbmp.classifiers.util.</tt><tt class="descname">align</tt><big>(</big><em>word</em>, <em>max_len=20</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/util.html#align"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.util.align" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the input word into the format matching the instancebase</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>word (str): a string representing a word.
+max_len (int): the maximum length of variables</dd>
+<dt>Returns:</dt>
+<dd>An examplar (str) to be classified</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.classifiers.util.to_input">
+<tt class="descclassname">mbmp.classifiers.util.</tt><tt class="descname">to_input</tt><big>(</big><em>parse</em><big>)</big><a class="reference internal" href="_modules/mbmp/classifiers/util.html#to_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.classifiers.util.to_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a parse from MBMA into the input format that can be used
+by <a class="reference internal" href="mbmp.train.html#module-mbmp.train.mbmptrain" title="mbmp.train.mbmptrain"><tt class="xref py py-mod docutils literal"><span class="pre">mbmp.train.mbmptrain</span></tt></a>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">classifiers Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">classifiers</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-mbmp.classifiers.api"><tt class="docutils literal"><span class="pre">api</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.classifiers.classifier"><tt class="docutils literal"><span class="pre">classifier</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.classifiers.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mbmp.html"
+                        title="previous chapter">mbmp Package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mbmp.parse.html"
+                        title="next chapter">parse Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mbmp.classifiers.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.parse.html" title="parse Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mbmp.html" title="mbmp Package"
+             >previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" >mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

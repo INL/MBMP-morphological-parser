@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>train Package &mdash; mbmp 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="mbmp 0.4 documentation" href="index.html" />
+    <link rel="up" title="mbmp Package" href="mbmp.html" />
+    <link rel="prev" title="server Package" href="mbmp.server.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.server.html" title="server Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" accesskey="U">mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="train-package">
+<h1>train Package<a class="headerlink" href="#train-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><tt class="xref py py-mod docutils literal"><span class="pre">train</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-mbmp.train"></span><dl class="function">
+<dt id="mbmp.train.format_testitem">
+<tt class="descclassname">mbmp.train.</tt><tt class="descname">format_testitem</tt><big>(</big><em>item</em>, <em>size=5</em>, <em>sep='</em>, <em>'</em><big>)</big><a class="headerlink" href="#mbmp.train.format_testitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a window with empty outcome slots (&#8216;?&#8217;) for a test item:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">format_testitem</span><span class="p">(</span><span class="s">&#39;aardigheidje&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">window</span>
+<span class="go">_,_,_,_,_,a,a,r,d,i,g,?</span>
+<span class="go">_,_,_,_,a,a,r,d,i,g,h,?</span>
+<span class="go">_,_,_,a,a,r,d,i,g,h,e,?</span>
+<span class="go">_,_,a,a,r,d,i,g,h,e,i,?</span>
+<span class="go">_,a,a,r,d,i,g,h,e,i,d,?</span>
+<span class="go">a,a,r,d,i,g,h,e,i,d,j,?</span>
+<span class="go">a,r,d,i,g,h,e,i,d,j,e,?</span>
+<span class="go">r,d,i,g,h,e,i,d,j,e,_,?</span>
+<span class="go">d,i,g,h,e,i,d,j,e,_,_,?</span>
+<span class="go">i,g,h,e,i,d,j,e,_,_,_,?</span>
+<span class="go">g,h,e,i,d,j,e,_,_,_,_,?</span>
+<span class="go">h,e,i,d,j,e,_,_,_,_,_,?</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>item (str): a string representing a word</li>
+<li>sep (str): the separator used to separate variables in the window.</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a complete window for word in which all outcomes are marked as &#8216;?&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.make_instances">
+<tt class="descclassname">mbmp.train.</tt><tt class="descname">make_instances</tt><big>(</big><em>item</em>, <em>tags</em>, <em>right=5</em>, <em>left=5</em>, <em>sep='</em>, <em>'</em><big>)</big><a class="headerlink" href="#mbmp.train.make_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a item into a windowed representation as described in
+Van den Bosch and Daelemans (1999):</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>item (str): a string representing a word</li>
+<li>tags (list): a list of tags per character of ITEM</li>
+<li>right (int): context on the right side of a focus letter.</li>
+<li>left (int): context on the left side of a focus letter.</li>
+<li>sep (str): the separator used to separate variables in the window.</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a window per character of item</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.make_tagged_instances">
+<tt class="descclassname">mbmp.train.</tt><tt class="descname">make_tagged_instances</tt><big>(</big><em>inst</em>, <em>fn</em>, <em>size=5</em>, <em>sep='+'</em>, <em>tagsep='&#64;'</em>, <em>windowsep='</em>, <em>'</em><big>)</big><a class="headerlink" href="#mbmp.train.make_tagged_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a window for a word with the given tags:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">make_tagged_instances</span><span class="p">(</span><span class="s">&#39;gezellig@A+heid@N|A*&#39;</span><span class="p">,</span> <span class="n">get_tags</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">window</span>
+<span class="go">_,_,_,_,_,g,e,z,e,l,l,A</span>
+<span class="go">_,_,_,_,g,e,z,e,l,l,i,0</span>
+<span class="go">_,_,_,g,e,z,e,l,l,i,g,0</span>
+<span class="go">_,_,g,e,z,e,l,l,i,g,h,0</span>
+<span class="go">_,g,e,z,e,l,l,i,g,h,e,0</span>
+<span class="go">g,e,z,e,l,l,i,g,h,e,i,0</span>
+<span class="go">e,z,e,l,l,i,g,h,e,i,d,0</span>
+<span class="go">z,e,l,l,i,g,h,e,i,d,_,0</span>
+<span class="go">e,l,l,i,g,h,e,i,d,_,_,N|A*</span>
+<span class="go">l,l,i,g,h,e,i,d,_,_,_,0</span>
+<span class="go">l,i,g,h,e,i,d,_,_,_,_,0</span>
+<span class="go">i,g,h,e,i,d,_,_,_,_,_,0</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>inst (str): a string with morphemes separated by SEP holding tags</dt>
+<dd><p class="first last">separated by TAGSEP.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>fn (function): the function used to extract the tags or segments.</dt>
+<dd><p class="first last">Use <tt class="xref py py-func docutils literal"><span class="pre">get_segments()</span></tt> to create an instance with segmentation
+marks. Use <tt class="xref py py-func docutils literal"><span class="pre">get_tags()</span></tt> to create an instance with Part of
+Speech marks.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">size (int): the window size</p>
+</li>
+<li><p class="first">sep (str): the separator used to separate the items of inst</p>
+</li>
+<li><p class="first">tagsep (str): the separator used to separate tags from</p>
+</li>
+<li><p class="first">windowsep (str): the separator used to separate variables in the window.</p>
+</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a complete window for word in which all outcomes are marked as &#8216;?&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.edit_distance">
+<tt class="descclassname">mbmp.train.</tt><tt class="descname">edit_distance</tt><big>(</big><em>source</em>, <em>target</em>, <em>matrixclass=&lt;class 'mbmp.train.transform.DistanceMatrix'&gt;</em><big>)</big><a class="headerlink" href="#mbmp.train.edit_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Levenstein distance for string word1 and word2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">matrix</span> <span class="o">=</span> <span class="n">edit_distance</span><span class="p">(</span><span class="s">&#39;beuk&#39;</span><span class="p">,</span> <span class="s">&#39;deuk&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matrix</span><span class="o">.</span><span class="n">distance</span><span class="p">()</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>source (str): the source word</li>
+<li>target (str): the target word</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><tt class="xref py py-class docutils literal"><span class="pre">DistanceMatrix</span></tt> &#8211; a distance matrix</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbma_repr">
+<tt class="descclassname">mbmp.train.</tt><tt class="descname">mbma_repr</tt><big>(</big><em>tree</em>, <em>sep='+'</em>, <em>split='&#64;'</em><big>)</big><a class="headerlink" href="#mbmp.train.mbma_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a tree structure into a flat representation used by MBMA:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">Tree</span><span class="p">(</span><span class="s">&#39;(N (V (PRE ver) (A grijs)) (SUF ing))&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">mbma_repr</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>&#8216;ver&#64;V|*A+grijs&#64;A+ing&#64;N|V*WB&#8217;</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.train.mbmptrain">
+<span id="mbmptrain-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">mbmptrain</span></tt> Module<a class="headerlink" href="#module-mbmp.train.mbmptrain" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.delimiter_type">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">delimiter_type</tt><big>(</big><em>delimiter</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#delimiter_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.delimiter_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.format_testitem">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">format_testitem</tt><big>(</big><em>item</em>, <em>size=5</em>, <em>sep='</em>, <em>'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#format_testitem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.format_testitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a window with empty outcome slots (&#8216;?&#8217;) for a test item:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">format_testitem</span><span class="p">(</span><span class="s">&#39;aardigheidje&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">window</span>
+<span class="go">_,_,_,_,_,a,a,r,d,i,g,?</span>
+<span class="go">_,_,_,_,a,a,r,d,i,g,h,?</span>
+<span class="go">_,_,_,a,a,r,d,i,g,h,e,?</span>
+<span class="go">_,_,a,a,r,d,i,g,h,e,i,?</span>
+<span class="go">_,a,a,r,d,i,g,h,e,i,d,?</span>
+<span class="go">a,a,r,d,i,g,h,e,i,d,j,?</span>
+<span class="go">a,r,d,i,g,h,e,i,d,j,e,?</span>
+<span class="go">r,d,i,g,h,e,i,d,j,e,_,?</span>
+<span class="go">d,i,g,h,e,i,d,j,e,_,_,?</span>
+<span class="go">i,g,h,e,i,d,j,e,_,_,_,?</span>
+<span class="go">g,h,e,i,d,j,e,_,_,_,_,?</span>
+<span class="go">h,e,i,d,j,e,_,_,_,_,_,?</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>item (str): a string representing a word</li>
+<li>sep (str): the separator used to separate variables in the window.</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a complete window for word in which all outcomes are marked as &#8216;?&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.get_rewrite_tags">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">get_rewrite_tags</tt><big>(</big><em>inst</em>, <em>sep=None</em>, <em>tagsep=None</em>, <em>default='0'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#get_rewrite_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.get_rewrite_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original word and the rewite tags to transform the
+word into the corresponding lemma per character of word. An instance
+such as <tt class="docutils literal"><span class="pre">k,l,o,p,p+DEL:p,e,n</span></tt> is converted into:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">&#39;kloppen&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;DEL:p&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.get_segments">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">get_segments</tt><big>(</big><em>inst</em>, <em>sep='+'</em>, <em>tagsep=None</em>, <em>default='0'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#get_segments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.get_segments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original word and the tags per character. An instance
+such as <tt class="docutils literal"><span class="pre">huis+deur</span></tt> is converted into:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">&#39;huisdeur&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;+&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.get_tags">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">get_tags</tt><big>(</big><em>inst</em>, <em>sep='+'</em>, <em>tagsep='&#64;'</em>, <em>default='0'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#get_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.get_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original word and the tags per character. An instance
+such as <tt class="docutils literal"><span class="pre">huis&#64;N+deur&#64;NWB</span></tt> is converted into:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">&#39;huisdeur&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;NWB&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.get_tags_and_rewrite_tags">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">get_tags_and_rewrite_tags</tt><big>(</big><em>source</em>, <em>target</em>, <em>sep='+'</em>, <em>tagsep='&#64;'</em>, <em>default='0'</em>, <em>nltk_tree=False</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#get_tags_and_rewrite_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.get_tags_and_rewrite_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original word and the rewite tags + POS tags per character.
+An instance such as <tt class="docutils literal"><span class="pre">huiz&#64;N+en&#64;INFL</span> <span class="pre">huis&#64;N+en&#64;INFL</span></tt> is converted into:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">&#39;huizen&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;DEL:z+INS:s&#39;</span><span class="p">,</span><span class="s">&#39;INFL&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">,</span><span class="s">&#39;0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.lemma_formatter">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">lemma_formatter</tt><big>(</big><em>source</em>, <em>target</em>, <em>string=True</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#lemma_formatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.lemma_formatter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.main">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.make_instances">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">make_instances</tt><big>(</big><em>item</em>, <em>tags</em>, <em>right=5</em>, <em>left=5</em>, <em>sep='</em>, <em>'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#make_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.make_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a item into a windowed representation as described in
+Van den Bosch and Daelemans (1999):</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>item (str): a string representing a word</li>
+<li>tags (list): a list of tags per character of ITEM</li>
+<li>right (int): context on the right side of a focus letter.</li>
+<li>left (int): context on the left side of a focus letter.</li>
+<li>sep (str): the separator used to separate variables in the window.</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a window per character of item</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.make_tagged_instances">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">make_tagged_instances</tt><big>(</big><em>inst</em>, <em>fn</em>, <em>size=5</em>, <em>sep='+'</em>, <em>tagsep='&#64;'</em>, <em>windowsep='</em>, <em>'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#make_tagged_instances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.make_tagged_instances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a window for a word with the given tags:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">make_tagged_instances</span><span class="p">(</span><span class="s">&#39;gezellig@A+heid@N|A*&#39;</span><span class="p">,</span> <span class="n">get_tags</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">window</span>
+<span class="go">_,_,_,_,_,g,e,z,e,l,l,A</span>
+<span class="go">_,_,_,_,g,e,z,e,l,l,i,0</span>
+<span class="go">_,_,_,g,e,z,e,l,l,i,g,0</span>
+<span class="go">_,_,g,e,z,e,l,l,i,g,h,0</span>
+<span class="go">_,g,e,z,e,l,l,i,g,h,e,0</span>
+<span class="go">g,e,z,e,l,l,i,g,h,e,i,0</span>
+<span class="go">e,z,e,l,l,i,g,h,e,i,d,0</span>
+<span class="go">z,e,l,l,i,g,h,e,i,d,_,0</span>
+<span class="go">e,l,l,i,g,h,e,i,d,_,_,N|A*</span>
+<span class="go">l,l,i,g,h,e,i,d,_,_,_,0</span>
+<span class="go">l,i,g,h,e,i,d,_,_,_,_,0</span>
+<span class="go">i,g,h,e,i,d,_,_,_,_,_,0</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>inst (str): a string with morphemes separated by SEP holding tags</dt>
+<dd><p class="first last">separated by TAGSEP.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>fn (function): the function used to extract the tags or segments.</dt>
+<dd><p class="first last">Use <a class="reference internal" href="#mbmp.train.mbmptrain.get_segments" title="mbmp.train.mbmptrain.get_segments"><tt class="xref py py-func docutils literal"><span class="pre">get_segments()</span></tt></a> to create an instance with segmentation
+marks. Use <a class="reference internal" href="#mbmp.train.mbmptrain.get_tags" title="mbmp.train.mbmptrain.get_tags"><tt class="xref py py-func docutils literal"><span class="pre">get_tags()</span></tt></a> to create an instance with Part of
+Speech marks.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">size (int): the window size</p>
+</li>
+<li><p class="first">sep (str): the separator used to separate the items of inst</p>
+</li>
+<li><p class="first">tagsep (str): the separator used to separate tags from</p>
+</li>
+<li><p class="first">windowsep (str): the separator used to separate variables in the window.</p>
+</li>
+</ul>
+</dd>
+<dt>Yields:</dt>
+<dd>a complete window for word in which all outcomes are marked as &#8216;?&#8217;</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.mbma_repr">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">mbma_repr</tt><big>(</big><em>tree</em>, <em>sep='+'</em>, <em>split='&#64;'</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#mbma_repr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.mbma_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a tree structure into a flat representation used by MBMA:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">Tree</span><span class="p">(</span><span class="s">&#39;(N (V (PRE ver) (A grijs)) (SUF ing))&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">mbma_repr</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>&#8216;ver&#64;V|*A+grijs&#64;A+ing&#64;N|V*WB&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.mbmptrain.timbl_instancebase">
+<tt class="descclassname">mbmp.train.mbmptrain.</tt><tt class="descname">timbl_instancebase</tt><big>(</big><em>filepath</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/mbmptrain.html#timbl_instancebase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.mbmptrain.timbl_instancebase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a timbl instancebase from a trainingfile. Default output is 
+original file plus instancebase as extension.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>filepath (str): the path to the trainingfile</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.train.transform">
+<span id="transform-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">transform</span></tt> Module<a class="headerlink" href="#module-mbmp.train.transform" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mbmp.train.transform.Cell">
+<em class="property">class </em><tt class="descclassname">mbmp.train.transform.</tt><tt class="descname">Cell</tt><big>(</big><em>cost=0, parent=[0, 0], action=None, character=None</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#Cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.Cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A class representing a cell in the L{DistanceMatrix}</p>
+<dl class="method">
+<dt id="mbmp.train.transform.Cell.cost">
+<tt class="descname">cost</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#Cell.cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.Cell.cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the cost to get to this cell.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mbmp.train.transform.DistanceMatrix">
+<em class="property">class </em><tt class="descclassname">mbmp.train.transform.</tt><tt class="descname">DistanceMatrix</tt><big>(</big><em>source</em>, <em>target</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A Matrix that is used to calculate the edit distance between to strings.</p>
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.backtrace">
+<tt class="descname">backtrace</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.backtrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.backtrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns: the transformation path for two strings with the lowest cost.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.delete">
+<tt class="descname">delete</tt><big>(</big><em>i</em>, <em>j</em>, <em>cost=1</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns: the deletion cost</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.distance">
+<tt class="descname">distance</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns: the distance between two strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.init_table">
+<tt class="descname">init_table</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.init_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.init_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inititalize the distance matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.insert">
+<tt class="descname">insert</tt><big>(</big><em>i</em>, <em>j</em>, <em>cost=1</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the insertion cost</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mbmp.train.transform.DistanceMatrix.replace">
+<tt class="descname">replace</tt><big>(</big><em>i</em>, <em>j</em>, <em>cost=2</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#DistanceMatrix.replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.DistanceMatrix.replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns: the replacement cost</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.transform.edit_distance">
+<tt class="descclassname">mbmp.train.transform.</tt><tt class="descname">edit_distance</tt><big>(</big><em>source</em>, <em>target</em>, <em>matrixclass=&lt;class 'mbmp.train.transform.DistanceMatrix'&gt;</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#edit_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.edit_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Levenstein distance for string word1 and word2:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">matrix</span> <span class="o">=</span> <span class="n">edit_distance</span><span class="p">(</span><span class="s">&#39;beuk&#39;</span><span class="p">,</span> <span class="s">&#39;deuk&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matrix</span><span class="o">.</span><span class="n">distance</span><span class="p">()</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><ul class="first last simple">
+<li>source (str): the source word</li>
+<li>target (str): the target word</li>
+</ul>
+</dd>
+<dt>Returns:</dt>
+<dd><a class="reference internal" href="#mbmp.train.transform.DistanceMatrix" title="mbmp.train.transform.DistanceMatrix"><tt class="xref py py-class docutils literal"><span class="pre">DistanceMatrix</span></tt></a> &#8211; a distance matrix</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.transform.rewrite_string">
+<tt class="descclassname">mbmp.train.transform.</tt><tt class="descname">rewrite_string</tt><big>(</big><em>trace</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/transform.html#rewrite_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.transform.rewrite_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based on the backtrace of edit_distance, return a string that can
+be given to the different classifiers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">edit_distance</span><span class="p">(</span><span class="s">&#39;beuk&#39;</span><span class="p">,</span> <span class="s">&#39;deuk&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">m</span><span class="o">.</span><span class="n">backtrace</span><span class="p">()</span>
+<span class="go">[((&#39;b&#39;, &#39;_&#39;), &#39;DEL&#39;), ((&#39;_&#39;, &#39;d&#39;), &#39;INS&#39;), ((&#39;e&#39;, &#39;e&#39;), &#39;REP&#39;),</span>
+<span class="go"> ((&#39;u&#39;, &#39;u&#39;), &#39;REP&#39;), ((&#39;k&#39;, &#39;k&#39;), &#39;REP&#39;)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">rewrite_string</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">backtrace</span><span class="p">())</span>
+<span class="go">[&#39;b+DEL:b+INS:d&#39;, &#39;e&#39;, &#39;u&#39;, &#39;k&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mbmp.train.util">
+<span id="util-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">util</span></tt> Module<a class="headerlink" href="#module-mbmp.train.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mbmp.train.util.unicode_csv_reader">
+<tt class="descclassname">mbmp.train.util.</tt><tt class="descname">unicode_csv_reader</tt><big>(</big><em>unicode_csv_data</em>, <em>dialect=&lt;class csv.excel at 0x7a3ea78&gt;</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/util.html#unicode_csv_reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.util.unicode_csv_reader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="mbmp.train.util.utf_8_encoder">
+<tt class="descclassname">mbmp.train.util.</tt><tt class="descname">utf_8_encoder</tt><big>(</big><em>unicode_csv_data</em><big>)</big><a class="reference internal" href="_modules/mbmp/train/util.html#utf_8_encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mbmp.train.util.utf_8_encoder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">train Package</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">train</span></tt> Package</a></li>
+<li><a class="reference internal" href="#module-mbmp.train.mbmptrain"><tt class="docutils literal"><span class="pre">mbmptrain</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.train.transform"><tt class="docutils literal"><span class="pre">transform</span></tt> Module</a></li>
+<li><a class="reference internal" href="#module-mbmp.train.util"><tt class="docutils literal"><span class="pre">util</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mbmp.server.html"
+                        title="previous chapter">server Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/mbmp.train.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mbmp.server.html" title="server Package"
+             >previous</a> |</li>
+        <li><a href="index.html">mbmp 0.4 documentation</a> &raquo;</li>
+          <li><a href="mbmp.html" >mbmp Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Folgert Karsdorp.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
